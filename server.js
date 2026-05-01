@@ -16,7 +16,10 @@ const ALLOWED_TYPES = new Set([
   "application/pdf",
   "image/jpeg",
   "image/png",
-  "image/webp"
+  "image/webp",
+  "text/plain",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
 
 ensurePrivateFolders();
@@ -60,14 +63,15 @@ async function handleUpload(req, res) {
   }
 
   const body = await readRequestBody(req, MAX_UPLOAD_BYTES);
-  const file = parseSingleMultipartFile(body, contentType);
+  const form = parseMultipartForm(body, contentType);
+  const file = form.file;
 
   if (!file) {
     return sendJson(res, 400, { error: "Please choose one file." });
   }
 
   if (!ALLOWED_TYPES.has(file.contentType)) {
-    return sendJson(res, 400, { error: "Please upload a PDF, JPG, PNG, or WebP image." });
+    return sendJson(res, 400, { error: "Please upload a PDF, image, or document file." });
   }
 
   const jobId = crypto.randomUUID();
@@ -90,7 +94,8 @@ async function handleUpload(req, res) {
       jobId,
       mimeType: file.contentType,
       originalName: file.filename,
-      sizeBytes: file.data.length
+      sizeBytes: file.data.length,
+      selectedCategory: form.fields.documentCategory || "auto"
     }
   });
 
@@ -134,10 +139,11 @@ function readRequestBody(req, maxBytes) {
   });
 }
 
-function parseSingleMultipartFile(body, contentType) {
+function parseMultipartForm(body, contentType) {
   const boundaryMatch = contentType.match(/boundary=(?:"([^"]+)"|([^;]+))/i);
   const boundary = boundaryMatch && (boundaryMatch[1] || boundaryMatch[2]);
-  if (!boundary) return null;
+  const form = { file: null, fields: {} };
+  if (!boundary) return form;
 
   const boundaryBuffer = Buffer.from(`--${boundary}`);
   const parts = splitBuffer(body, boundaryBuffer);
@@ -159,15 +165,21 @@ function parseSingleMultipartFile(body, contentType) {
     const typeMatch = rawHeaders.match(/content-type:\s*([^\r\n]+)/i);
 
     if (disposition && fileNameMatch && fileNameMatch[1]) {
-      return {
+      form.file = {
         filename: path.basename(fileNameMatch[1]),
         contentType: (typeMatch && typeMatch[1].trim().toLowerCase()) || "application/octet-stream",
         data
       };
+      continue;
+    }
+
+    const nameMatch = rawHeaders.match(/name="([^"]*)"/i);
+    if (disposition && nameMatch && nameMatch[1]) {
+      form.fields[nameMatch[1]] = data.toString("utf8").trim();
     }
   }
 
-  return null;
+  return form;
 }
 
 function splitBuffer(buffer, separator) {
@@ -207,6 +219,9 @@ function extensionForType(contentType) {
   if (contentType === "image/jpeg") return ".jpg";
   if (contentType === "image/png") return ".png";
   if (contentType === "image/webp") return ".webp";
+  if (contentType === "text/plain") return ".txt";
+  if (contentType === "application/msword") return ".doc";
+  if (contentType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") return ".docx";
   return ".bin";
 }
 

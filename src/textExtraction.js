@@ -14,8 +14,8 @@ async function extractTextFromUpload({ filePath, mimeType, originalName }) {
     "Placeholder extracted text for MVP testing.",
     `Original file name: ${originalName}.`,
     `Detected file type: ${mimeType}.`,
-    "The document appears to be a formal incoming letter.",
-    "It may ask the reader to check the letter and take one next step.",
+    "The document appears to be a readable formal document.",
+    "It may include information, dates, payment details, appointments, or next steps.",
     "No clear deadline was found in the placeholder extraction."
   ].join("\n");
 }
