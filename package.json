@@ -1,0 +1,13 @@
+{
+  "name": "clearsteps",
+  "version": "0.1.0",
+  "description": "ClearSteps MVP: an accessibility-first letter simplifier.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

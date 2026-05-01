@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ClearSteps</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="page" aria-labelledby="page-title">
+      <section class="intro">
+        <p class="eyebrow">ClearSteps</p>
+        <h1 id="page-title">Make a formal letter easier to understand.</h1>
+        <p class="lead">Upload one PDF or image.</p>
+      </section>
+
+      <section class="upload-panel" aria-label="Upload a letter">
+        <form id="upload-form" class="upload-form">
+          <label class="file-label" for="letter-file">
+            <span class="file-label-title">Choose a letter</span>
+            <span id="file-name" class="file-label-hint">PDF, JPG, PNG, or WebP</span>
+          </label>
+          <input id="letter-file" name="letter" type="file" accept="application/pdf,image/jpeg,image/png,image/webp">
+          <button id="submit-button" type="submit">Simplify letter</button>
+        </form>
+
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="result-card" class="result-card hidden" aria-label="Simplified letter result">
+        <div id="warning" class="warning hidden"></div>
+
+        <dl class="result-list">
+          <div>
+            <dt>Summary</dt>
+            <dd id="summary"></dd>
+          </div>
+          <div>
+            <dt>Action</dt>
+            <dd id="action"></dd>
+          </div>
+          <div>
+            <dt>Deadline</dt>
+            <dd id="deadline"></dd>
+          </div>
+          <div>
+            <dt>Risk</dt>
+            <dd id="risk"></dd>
+          </div>
+          <div>
+            <dt>Note</dt>
+            <dd id="note"></dd>
+          </div>
+        </dl>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
