@@ -4,251 +4,188 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ClearSteps</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <main class="app-shell" aria-labelledby="app-title">
-      <nav class="journey-nav" aria-label="ClearSteps journey">
-        <div class="route-line" aria-hidden="true"></div>
-        <button type="button" class="route-step active" data-page="home">
-          <span class="route-dot"></span>
-          <span>Start</span>
-        </button>
-        <button type="button" class="route-step" data-page="upload">
-          <span class="route-dot"></span>
-          <span>Upload</span>
-        </button>
-        <button type="button" class="route-step" data-page="understand">
-          <span class="route-dot"></span>
-          <span>Understand</span>
-        </button>
-        <button type="button" class="route-step" data-page="act">
-          <span class="route-dot"></span>
-          <span>Act</span>
-        </button>
-        <button type="button" class="route-step" data-page="check">
-          <span class="route-dot"></span>
-          <span>Check</span>
-        </button>
+    <header class="topbar">
+      <button type="button" class="brand-button" data-page-link="home" aria-label="Go to home">
+        <span class="brand-mark">C</span>
+        <span class="brand-text">ClearSteps</span>
+      </button>
+
+      <nav class="top-links" aria-label="Main pages">
+        <button type="button" class="top-link active" data-page-link="home">Home</button>
+        <button type="button" class="top-link" data-page-link="journey">Document Journey</button>
+        <button type="button" class="top-link" data-page-link="help">Help</button>
       </nav>
 
-      <section id="page-home" class="page-view active" aria-labelledby="app-title">
-        <div class="home-grid">
-          <div class="hero-copy">
+      <div class="mode-row">
+        <button type="button" class="mode-btn" data-theme="light" aria-label="Light mode">
+          <span class="icon">☼</span>
+        </button>
+        <button type="button" class="mode-btn" data-theme="dark" aria-label="Dark mode">
+          <span class="icon">☾</span>
+        </button>
+        <button type="button" class="mode-btn" data-theme="night" aria-label="Night mode">
+          <span class="icon">✦</span>
+        </button>
+        <button type="button" class="mode-btn" data-toggle="focus-mode" aria-label="Focus mode">
+          <span class="icon">◎</span>
+        </button>
+        <button type="button" class="mode-btn" data-toggle="dyslexia-mode" aria-label="Dyslexia mode">
+          <span class="icon">Aa</span>
+        </button>
+        <button type="button" class="mode-btn" data-page-link="help" aria-label="Help page">
+          <span class="icon">♥</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <section id="page-home" class="page active" aria-labelledby="home-title">
+        <div class="home-layout">
+          <div class="home-copy">
             <p class="eyebrow">ClearSteps</p>
-            <h1 id="app-title">Make difficult documents easier to understand</h1>
-            <p class="lead">Upload a letter, bill, notice, email, or document. We explain it step by step.</p>
-            <button type="button" class="primary-button" data-next="upload">Start</button>
+            <h1 id="home-title">Make difficult documents easier to understand.</h1>
+            <p class="lead">
+              Upload a letter, bill, email, notice, or document.
+              We explain it step by step.
+            </p>
+            <button type="button" class="primary-btn" data-page-link="journey">Start your document journey</button>
+            <p class="reassure">One step at a time. No overload.</p>
           </div>
 
-          <div class="map-card" aria-label="ClearSteps journey map">
-            <div class="map-path" aria-hidden="true"></div>
-            <div class="map-marker marker-start">
-              <span class="marker-icon">1</span>
-              <span>Start</span>
-            </div>
-            <div class="map-marker marker-upload">
-              <span class="marker-icon">2</span>
-              <span>Upload</span>
-            </div>
-            <div class="map-marker marker-understand">
-              <span class="marker-icon">3</span>
-              <span>Understand</span>
-            </div>
-            <div class="map-marker marker-act">
-              <span class="marker-icon">4</span>
-              <span>Act</span>
-            </div>
-            <div class="map-marker marker-check">
-              <span class="marker-icon">5</span>
-              <span>Check</span>
-            </div>
-            <div class="map-tree tree-one" aria-hidden="true"></div>
-            <div class="map-tree tree-two" aria-hidden="true"></div>
-            <div class="map-tree tree-three" aria-hidden="true"></div>
-            <div class="map-label">A calm route through confusing text</div>
+          <div class="home-map" aria-label="Journey preview">
+            <div class="map-track"></div>
+            <div class="map-stop stop-upload"><span>Upload</span></div>
+            <div class="map-stop stop-understand"><span>Understand</span></div>
+            <div class="map-stop stop-act"><span>Act</span></div>
+            <div class="map-stop stop-check"><span>Check</span></div>
+            <div class="map-shape shape-a"></div>
+            <div class="map-shape shape-b"></div>
+            <div class="map-shape shape-c"></div>
           </div>
         </div>
       </section>
 
-      <section id="page-upload" class="page-view" aria-labelledby="upload-title">
-        <div class="page-card upload-journey-card">
-          <div class="page-heading">
-            <p class="eyebrow">Step 2</p>
-            <h2 id="upload-title">Upload one document calmly</h2>
-            <p>We will explain it in small steps.</p>
+      <section id="page-journey" class="page" aria-labelledby="journey-title">
+        <div class="journey-header">
+          <p class="eyebrow">Document Journey</p>
+          <h2 id="journey-title">From confusion to clarity</h2>
+          <div class="journey-rail" aria-label="Journey steps">
+            <span class="rail-step active" data-rail="upload">Upload</span>
+            <span class="rail-step" data-rail="understand">Understand</span>
+            <span class="rail-step" data-rail="act">Act</span>
+            <span class="rail-step" data-rail="check">Check</span>
           </div>
+        </div>
 
+        <section class="panel upload-panel" aria-label="Upload area">
+          <h3>Choose a document</h3>
           <form id="upload-form">
-            <label class="upload-dropzone" for="document-file">
-              <span class="dropzone-icon">+</span>
-              <span class="dropzone-title">Choose file</span>
-              <span id="file-name" class="dropzone-hint">Drag and drop, or browse</span>
-              <span class="file-types">PDF, image, document</span>
+            <label class="dropzone" for="document-file">
+              <span class="dropzone-title">Drag and drop or browse</span>
+              <span id="file-name" class="dropzone-sub">PDF, image, document</span>
+              <span class="helper-line">We will turn it into small clear steps.</span>
             </label>
             <input id="document-file" name="document" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
 
-            <fieldset class="chip-field">
-              <legend>Document type</legend>
-              <div class="chip-row" role="radiogroup" aria-label="Document type">
-                <button type="button" class="type-chip active" data-category="auto" role="radio" aria-checked="true">Auto detect</button>
-                <button type="button" class="type-chip" data-category="letter" role="radio" aria-checked="false">Letter</button>
-                <button type="button" class="type-chip" data-category="bill" role="radio" aria-checked="false">Bill</button>
-                <button type="button" class="type-chip" data-category="work" role="radio" aria-checked="false">Work</button>
-                <button type="button" class="type-chip" data-category="medical" role="radio" aria-checked="false">Medical</button>
-                <button type="button" class="type-chip" data-category="school" role="radio" aria-checked="false">School</button>
-                <button type="button" class="type-chip" data-category="legal" role="radio" aria-checked="false">Legal</button>
-                <button type="button" class="type-chip" data-category="email" role="radio" aria-checked="false">Email</button>
-                <button type="button" class="type-chip" data-category="article" role="radio" aria-checked="false">Article</button>
-                <button type="button" class="type-chip" data-category="other" role="radio" aria-checked="false">Other</button>
-              </div>
-            </fieldset>
+            <div class="chips" role="radiogroup" aria-label="Document type">
+              <button type="button" class="chip active" data-category="auto" role="radio" aria-checked="true">Auto detect</button>
+              <button type="button" class="chip" data-category="letter" role="radio" aria-checked="false">Letter</button>
+              <button type="button" class="chip" data-category="bill" role="radio" aria-checked="false">Bill</button>
+              <button type="button" class="chip" data-category="work" role="radio" aria-checked="false">Work</button>
+              <button type="button" class="chip" data-category="medical" role="radio" aria-checked="false">Medical</button>
+              <button type="button" class="chip" data-category="school" role="radio" aria-checked="false">School</button>
+              <button type="button" class="chip" data-category="legal" role="radio" aria-checked="false">Legal</button>
+              <button type="button" class="chip" data-category="email" role="radio" aria-checked="false">Email</button>
+              <button type="button" class="chip" data-category="article" role="radio" aria-checked="false">Article</button>
+              <button type="button" class="chip" data-category="other" role="radio" aria-checked="false">Other</button>
+            </div>
 
             <div id="status" class="status" role="status" aria-live="polite"></div>
 
-            <div class="page-actions">
-              <button type="button" class="secondary-button" data-back="home">Back</button>
-              <button id="submit-button" type="submit" class="primary-button">Next</button>
+            <div class="upload-actions">
+              <button type="submit" id="submit-button" class="primary-btn">Understand this document</button>
+              <button type="button" id="card-style-button" class="soft-btn">Card Style</button>
+              <button type="button" id="check-button" class="soft-btn">Document Check</button>
             </div>
           </form>
-        </div>
-      </section>
+        </section>
 
-      <section id="page-understand" class="page-view" aria-labelledby="understand-title">
-        <div class="slide-layout">
-          <div class="page-heading">
-            <p class="eyebrow">Step 3</p>
-            <h2 id="understand-title">Understand one step at a time</h2>
-          </div>
-
-          <article class="explain-slide" aria-live="polite">
-            <div id="slide-icon" class="slide-icon" aria-hidden="true">?</div>
-            <p id="slide-count" class="slide-count">1 of 6</p>
-            <h3 id="slide-title">What is this?</h3>
-            <p id="slide-answer">Upload a document to begin.</p>
-            <button type="button" id="details-button" class="detail-button">Small detail</button>
-          </article>
-
-          <div class="slide-progress" aria-label="Card progress">
-            <span class="progress-dot active"></span>
-            <span class="progress-dot"></span>
-            <span class="progress-dot"></span>
-            <span class="progress-dot"></span>
-            <span class="progress-dot"></span>
-            <span class="progress-dot"></span>
-          </div>
-
-          <div class="page-actions">
-            <button type="button" id="slide-back" class="secondary-button">Back</button>
-            <button type="button" id="slide-next" class="primary-button">Next</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="page-act" class="page-view" aria-labelledby="act-title">
-        <div class="page-heading">
-          <p class="eyebrow">Step 4</p>
-          <h2 id="act-title">Choose one next step</h2>
-        </div>
-
-        <div class="action-grid">
-          <button type="button" class="action-card" id="copy-summary">
-            <span class="action-icon">C</span>
-            <span>Copy summary</span>
-          </button>
-          <button type="button" class="action-card" id="add-calendar">
-            <span class="action-icon">D</span>
-            <span>Add to calendar</span>
-          </button>
-          <button type="button" class="action-card" id="send-reminder">
-            <span class="action-icon">R</span>
-            <span>Send reminder</span>
-          </button>
-          <button type="button" class="action-card" id="upload-another">
-            <span class="action-icon">U</span>
-            <span>Upload another document</span>
-          </button>
-        </div>
-
-        <div id="action-message" class="status" role="status" aria-live="polite"></div>
-
-        <div class="page-actions">
-          <button type="button" class="secondary-button" data-back="understand">Back</button>
-          <button type="button" class="primary-button" data-next="check">Next</button>
-        </div>
-      </section>
-
-      <section id="page-check" class="page-view" aria-labelledby="check-title">
-        <div class="check-map">
-          <section class="key-panel" aria-labelledby="check-title">
-            <p class="eyebrow">Step 5</p>
-            <h2 id="check-title">Document Check</h2>
-            <div class="badge-list">
-              <div class="badge-row">
-                <span>Trust level</span>
-                <strong id="trust-level">Cannot confirm authenticity</strong>
-              </div>
-              <div class="badge-row">
-                <span>Severity</span>
-                <strong id="severity-level">Low</strong>
-              </div>
-              <div class="badge-row">
-                <span>Document status</span>
-                <strong id="document-status">Other</strong>
-              </div>
-              <div class="badge-row">
-                <span>Confidence</span>
-                <strong id="confidence">Low</strong>
-              </div>
-              <div class="badge-row">
-                <span>Needs review</span>
-                <strong id="needs-review">No</strong>
-              </div>
+        <div class="journey-main">
+          <section class="panel card-panel" aria-label="Guided card">
+            <div class="card-top">
+              <p id="card-progress" class="card-progress">1 of 6</p>
+              <button type="button" id="details-button" class="soft-btn">Details</button>
             </div>
-            <div class="safe-box">
-              <h3>Safe next step</h3>
-              <p id="safe-next-step">Check the original document before acting.</p>
+            <div id="card-style-marker" class="style-marker">Simple Cards</div>
+            <div id="card-icon" class="card-icon">D</div>
+            <h3 id="card-title">What is this</h3>
+            <p id="card-answer" class="card-answer">Upload a document to begin.</p>
+            <div class="card-nav">
+              <button type="button" id="card-back" class="soft-btn">Back</button>
+              <button type="button" id="card-next" class="primary-btn">Next</button>
             </div>
-            <div id="possible-issue" class="issue-note">Some details may need checking.</div>
           </section>
 
-          <section class="access-panel" aria-labelledby="access-title">
-            <h2 id="access-title">Accessibility controls</h2>
-            <label class="toggle-row">
-              <span>Larger text</span>
-              <input type="checkbox" data-toggle="large-text">
-            </label>
-            <label class="toggle-row">
-              <span>More spacing</span>
-              <input type="checkbox" data-toggle="more-spacing">
-            </label>
-            <label class="toggle-row">
-              <span>High contrast</span>
-              <input type="checkbox" data-toggle="high-contrast">
-            </label>
-            <label class="toggle-row">
-              <span>Reduced motion</span>
-              <input type="checkbox" data-toggle="reduced-motion">
-            </label>
-            <label class="toggle-row">
-              <span>Focus mode</span>
-              <input type="checkbox" data-toggle="focus-mode">
-            </label>
-          </section>
+          <aside class="panel action-panel" aria-label="Actions">
+            <h3>Actions</h3>
+            <div class="action-grid">
+              <button type="button" class="action-btn" id="copy-summary">Copy summary</button>
+              <button type="button" class="action-btn" id="add-calendar">Add to calendar</button>
+              <button type="button" class="action-btn" id="send-reminder">Send reminder</button>
+              <button type="button" class="action-btn" id="upload-another">Upload another document</button>
+            </div>
+            <div class="coming-row">
+              <button type="button" class="soft-btn">Read aloud</button>
+              <span>Coming soon</span>
+            </div>
+            <div class="coming-row">
+              <button type="button" class="soft-btn">Custom cards</button>
+              <span>Coming soon</span>
+            </div>
+            <div class="coming-row">
+              <button type="button" class="soft-btn">Saved preferences</button>
+              <span>Coming soon</span>
+            </div>
+            <div id="action-message" class="status" role="status" aria-live="polite"></div>
+          </aside>
         </div>
 
-        <div class="page-actions">
-          <button type="button" class="secondary-button" data-back="act">Back</button>
-          <button type="button" class="primary-button" data-next="upload">Start again</button>
+        <div id="achievement" class="achievement hidden" role="status" aria-live="polite">
+          <strong>Nice work.</strong>
+          <span>Your next step is ready.</span>
+        </div>
+      </section>
+
+      <section id="page-help" class="page" aria-labelledby="help-title">
+        <div class="help-layout">
+          <div class="help-head">
+            <p class="eyebrow">Help</p>
+            <h2 id="help-title">Support when things feel hard</h2>
+          </div>
+
+          <div class="help-cards">
+            <button type="button" class="help-card" data-help="overwhelmed">I feel overwhelmed</button>
+            <button type="button" class="help-card" data-help="fake">I think this document is fake</button>
+            <button type="button" class="help-card" data-help="deadline">I cannot find the deadline</button>
+            <button type="button" class="help-card" data-help="time">I need more time</button>
+            <button type="button" class="help-card" data-help="person">I need someone to help me</button>
+            <button type="button" class="help-card" data-help="wrong">I uploaded the wrong file</button>
+          </div>
         </div>
       </section>
     </main>
 
     <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-card">
-        <button type="button" id="modal-close" class="modal-close" aria-label="Close popup">Close</button>
-        <h2 id="modal-title">Details</h2>
-        <div id="modal-body"></div>
+      <div class="modal-box">
+        <button type="button" id="modal-close" class="soft-btn">Close</button>
+        <h3 id="modal-title">Details</h3>
+        <div id="modal-content"></div>
       </div>
     </div>
 
