@@ -1,12 +1,10 @@
 const pages = ["home", "journey", "help"];
-const journeyCardsTemplate = [
-  { key: "what_this_is", title: "What is this", icon: "D" },
-  { key: "important_points", title: "What matters most", icon: "P" },
-  { key: "action", title: "What do I need to do", icon: "A" },
-  { key: "deadline", title: "When is it due", icon: "C" },
-  { key: "risk", title: "What could happen", icon: "W" },
-  { key: "note", title: "Helpful note", icon: "I" }
-];
+const styleIcons = {
+  simple: ["D", "A", "C", "K", "R", "I"],
+  animal: ["O", "F", "E", "T", "B", "N"],
+  shape: ["O", "S", "T", "C", "A", "H"],
+  map: ["1", "2", "3", "4", "5", "6"]
+};
 
 const helpAnswers = {
   overwhelmed: "Read only the Action card first. You do not need to understand everything at once.",
@@ -17,19 +15,10 @@ const helpAnswers = {
   wrong: "Go back and upload another document."
 };
 
-const cardStyles = {
-  simple: { label: "Simple Cards", icons: ["D", "P", "A", "C", "W", "I"] },
-  animal: { label: "Animal Cards", icons: ["O", "B", "F", "T", "E", "B"] },
-  shape: { label: "Shape Cards", icons: ["O", "S", "A", "C", "T", "H"] },
-  map: { label: "Map Cards", icons: ["1", "2", "3", "4", "5", "6"] }
-};
-
-let latestResult = createMockResult();
 let selectedType = "auto";
-let activePage = "home";
-let activeTheme = "light";
 let activeCardStyle = "simple";
 let cardIndex = 0;
+let latestResult = createMockApiResult();
 
 const pageSections = Object.fromEntries(
   pages.map((page) => [page, document.querySelector(`#page-${page}`)])
@@ -45,6 +34,8 @@ const fileInput = document.querySelector("#document-file");
 const fileName = document.querySelector("#file-name");
 const statusText = document.querySelector("#status");
 const submitButton = document.querySelector("#submit-button");
+const cardSteps = document.querySelector("#card-steps");
+const trustBanner = document.querySelector("#trust-banner");
 const modal = document.querySelector("#modal");
 const modalTitle = document.querySelector("#modal-title");
 const modalContent = document.querySelector("#modal-content");
@@ -59,8 +50,7 @@ themeButtons.forEach((button) => {
 
 toggleButtons.forEach((button) => {
   button.addEventListener("click", () => {
-    const className = button.dataset.toggle;
-    document.body.classList.toggle(className);
+    document.body.classList.toggle(button.dataset.toggle);
     button.classList.toggle("active");
   });
 });
@@ -69,9 +59,9 @@ chips.forEach((chip) => {
   chip.addEventListener("click", () => {
     selectedType = chip.dataset.category;
     chips.forEach((item) => {
-      const selected = item === chip;
-      item.classList.toggle("active", selected);
-      item.setAttribute("aria-checked", String(selected));
+      const isSelected = item === chip;
+      item.classList.toggle("active", isSelected);
+      item.setAttribute("aria-checked", String(isSelected));
     });
   });
 });
@@ -93,13 +83,14 @@ form.addEventListener("submit", async (event) => {
   setLoading(true);
   setStatus("Reading your document.");
   setJourneyStep("upload");
+  document.querySelector("#achievement").classList.add("hidden");
 
   const formData = new FormData();
   formData.append("letter", file);
   formData.append("documentCategory", selectedType);
 
   try {
-    const response = await fetch("/api/upload", {
+    const response = await fetch("/api/simplify", {
       method: "POST",
       body: formData
     });
@@ -109,11 +100,11 @@ form.addEventListener("submit", async (event) => {
       throw new Error(payload.error || "Upload failed.");
     }
 
-    latestResult = normalizeResult(payload.result);
+    latestResult = normalizeApiResult(payload);
     cardIndex = 0;
     renderCard();
     setJourneyStep("understand");
-    setStatus("Your document is ready.");
+    setStatus("Your cue cards are ready.");
   } catch (error) {
     setStatus(error.message || "Please try again.");
   } finally {
@@ -131,53 +122,59 @@ document.querySelector("#card-back").addEventListener("click", () => {
 });
 
 document.querySelector("#card-next").addEventListener("click", () => {
-  if (cardIndex >= journeyCardsTemplate.length - 1) {
+  const cards = latestResult.cards;
+  if (cardIndex >= cards.length - 1) {
     setJourneyStep("act");
     document.querySelector("#achievement").classList.remove("hidden");
     return;
   }
+
   cardIndex += 1;
   renderCard();
   setJourneyStep("understand");
 });
 
 document.querySelector("#details-button").addEventListener("click", () => {
-  const card = getCards()[cardIndex];
-  openModal(card.title, `<p>${card.detail}</p>`);
+  const card = latestResult.cards[cardIndex];
+  const detail = buildCardDetail(card);
+  openModal(card.title, `<p>${detail}</p>`);
 });
 
 document.querySelector("#card-style-button").addEventListener("click", () => {
-  const rows = Object.keys(cardStyles)
-    .map((key) => {
-      const style = cardStyles[key];
-      const active = key === activeCardStyle ? " (Active)" : "";
-      return `<button type="button" class="soft-btn style-option" data-style="${key}">${style.label}${active}</button>`;
+  const styles = [
+    { id: "simple", label: "Simple Cards" },
+    { id: "animal", label: "Animal Cards" },
+    { id: "shape", label: "Shape Cards" },
+    { id: "map", label: "Map Cards" }
+  ];
+
+  const markup = styles
+    .map((style) => {
+      const activeText = style.id === activeCardStyle ? " (Active)" : "";
+      return `<button type="button" class="soft-btn style-option" data-style="${style.id}">${style.label}${activeText}</button>`;
     })
     .join("");
 
-  openModal(
-    "Card Style",
-    `<div class="style-list">${rows}<p>Custom card packs coming later.</p></div>`
-  );
+  openModal("Card Style", `<div class="style-list">${markup}<p>Custom card packs coming later.</p></div>`);
 
   document.querySelectorAll(".style-option").forEach((button) => {
     button.addEventListener("click", () => {
       activeCardStyle = button.dataset.style;
       closeModal();
       renderCard();
-      showActionMessage(`${cardStyles[activeCardStyle].label} selected.`);
+      showActionMessage(`${labelForStyle(activeCardStyle)} selected.`);
     });
   });
 });
 
 document.querySelector("#check-button").addEventListener("click", () => {
   setJourneyStep("check");
-  openModal("Document Check", buildCheckMarkup(latestResult));
+  openModal("Document Check", buildCheckMarkup(latestResult.trust));
 });
 
 document.querySelector("#copy-summary").addEventListener("click", async () => {
   setJourneyStep("act");
-  const text = latestResult.what_this_is;
+  const text = latestResult.cards[0]?.short_answer || latestResult.display_text;
   try {
     await navigator.clipboard.writeText(text);
     showActionMessage("Summary copied.");
@@ -188,13 +185,16 @@ document.querySelector("#copy-summary").addEventListener("click", async () => {
 
 document.querySelector("#add-calendar").addEventListener("click", () => {
   setJourneyStep("act");
-  if (hasDeadline(latestResult.deadline)) {
+  const deadlineCard = latestResult.cards.find((card) => card.id === "when_is_it_due");
+  const deadlineText = deadlineCard?.date || null;
+
+  if (deadlineText) {
     openModal(
       "Calendar preview",
-      `<p><strong>Document step:</strong> ${latestResult.action}</p><p><strong>Date:</strong> ${latestResult.deadline}</p>`
+      `<p><strong>Event:</strong> Document follow-up</p><p><strong>Date:</strong> ${deadlineText}</p>`
     );
   } else {
-    openModal("Calendar preview", "<p>No clear deadline found.<br>Calendar event cannot be created yet.</p>");
+    openModal("Calendar preview", "<p>No clear deadline found. Calendar event cannot be created yet.</p>");
   }
 });
 
@@ -210,13 +210,13 @@ document.querySelector("#send-reminder").addEventListener("click", () => {
       <button type="button" class="soft-btn">Custom</button>
       <p><strong>Notification permission needed</strong></p>
       <button type="button" class="primary-btn" id="allow-notification">Allow notifications</button>
-      <p>This is a placeholder. Real reminder scheduling is coming later.</p>
+      <p>This is a placeholder. Real scheduling is not active yet.</p>
     </div>`
   );
 
   document.querySelector("#allow-notification").addEventListener("click", () => {
-    showActionMessage("Notification permission placeholder shown.");
     closeModal();
+    showActionMessage("Notification permission placeholder shown.");
   });
 });
 
@@ -224,10 +224,10 @@ document.querySelector("#upload-another").addEventListener("click", () => {
   form.reset();
   fileName.textContent = "PDF, image, document";
   setStatus("");
-  setJourneyStep("upload");
-  latestResult = createMockResult();
+  latestResult = createMockApiResult();
   cardIndex = 0;
   renderCard();
+  setJourneyStep("upload");
   document.querySelector("#achievement").classList.add("hidden");
   fileInput.focus();
 });
@@ -256,23 +256,20 @@ renderCard();
 
 function setPage(page) {
   if (!pages.includes(page)) return;
-  activePage = page;
 
-  pages.forEach((item) => {
-    pageSections[item].classList.toggle("active", item === page);
+  pages.forEach((entry) => {
+    pageSections[entry].classList.toggle("active", entry === page);
   });
 
   pageLinks.forEach((button) => {
-    const selected = button.dataset.pageLink === page;
-    button.classList.toggle("active", selected);
-    button.setAttribute("aria-current", selected ? "page" : "false");
+    const isActive = button.dataset.pageLink === page;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-current", isActive ? "page" : "false");
   });
 }
 
 function setTheme(theme) {
-  activeTheme = theme;
   document.body.classList.remove("theme-dark", "theme-night");
-
   if (theme === "dark") document.body.classList.add("theme-dark");
   if (theme === "night") document.body.classList.add("theme-night");
 
@@ -282,65 +279,126 @@ function setTheme(theme) {
 }
 
 function renderCard() {
-  const cards = getCards();
-  const card = cards[cardIndex];
-  const style = cardStyles[activeCardStyle];
-  const icon = style.icons[cardIndex] || style.icons[0];
+  const card = latestResult.cards[cardIndex];
+  const styleIcon = styleIcons[activeCardStyle][cardIndex] || styleIcons.simple[cardIndex];
+  const iconText = activeCardStyle === "simple" ? iconFromCard(card.icon) : styleIcon;
 
-  document.querySelector("#card-progress").textContent = `${cardIndex + 1} of ${cards.length}`;
-  document.querySelector("#card-style-marker").textContent = style.label;
-  document.querySelector("#card-icon").textContent = icon;
+  document.querySelector("#card-progress").textContent = `${cardIndex + 1} of ${latestResult.cards.length}`;
+  document.querySelector("#card-style-marker").textContent = labelForStyle(activeCardStyle);
+  document.querySelector("#card-status").textContent = `Status: ${statusLabel(card.status)}`;
+  document.querySelector("#card-icon").textContent = iconText;
   document.querySelector("#card-title").textContent = card.title;
-  document.querySelector("#card-answer").textContent = card.answer;
+  document.querySelector("#card-answer").textContent = card.short_answer;
+
+  if (Array.isArray(card.steps) && card.steps.length > 0) {
+    cardSteps.classList.remove("hidden");
+    cardSteps.innerHTML = card.steps.map((step) => `<li>${step}</li>`).join("");
+  } else {
+    cardSteps.classList.add("hidden");
+    cardSteps.innerHTML = "";
+  }
+
+  renderTrustBanner();
 }
 
-function getCards() {
-  return journeyCardsTemplate.map((template, index) => {
-    const value = latestResult[template.key];
-    const answer = Array.isArray(value) ? value[0] : value;
+function renderTrustBanner() {
+  const trust = latestResult.trust;
+  trustBanner.classList.remove("trust-high", "trust-medium", "trust-low");
 
-    return {
-      title: template.title,
-      answer: answer || "No clear detail found.",
-      detail: buildDetailText(template.key, index)
-    };
-  });
-}
-
-function buildDetailText(key, index) {
-  if (key === "important_points") {
-    return listOrText(latestResult.important_points);
+  if (trust.trust_assessment === "high") {
+    trustBanner.classList.add("trust-high");
+    trustBanner.textContent = "This looks like a normal formal document.";
+    return;
   }
 
-  if (key === "note") {
-    return latestResult.review_reason || latestResult.note;
+  if (trust.trust_assessment === "medium") {
+    trustBanner.classList.add("trust-medium");
+    trustBanner.textContent = "Some parts need checking before you act.";
+    return;
   }
 
-  if (key === "risk") {
-    return latestResult.safe_action_message;
-  }
-
-  if (key === "deadline") {
-    return hasDeadline(latestResult.deadline)
-      ? "A deadline was found in the readable text."
-      : "No clear deadline found in the readable text.";
-  }
-
-  if (key === "action") {
-    return listOrText(latestResult.next_steps);
-  }
-
-  if (index === 0) {
-    return latestResult.document_title;
-  }
-
-  return "Check the original document for full context.";
+  trustBanner.classList.add("trust-low");
+  trustBanner.textContent = "This may be suspicious. Check before responding.";
 }
 
 function setJourneyStep(step) {
   railSteps.forEach((item) => {
     item.classList.toggle("active", item.dataset.rail === step);
   });
+}
+
+function buildCardDetail(card) {
+  if (card.id === "what_do_i_need_to_do" && card.steps?.length) {
+    return card.steps.join(" ");
+  }
+
+  if (card.id === "when_is_it_due") {
+    return card.date ? `Date found: ${card.date}.` : "No deadline clearly stated.";
+  }
+
+  return card.short_answer;
+}
+
+function buildCheckMarkup(trust) {
+  return `
+    <div class="check-grid">
+      <p><strong>Trust level</strong><br><span class="badge-chip ${classFromLevel(trust.trust_assessment)}">${trust.trust_assessment}</span></p>
+      <p><strong>Document type</strong><br>${trust.document_type}</p>
+      <p><strong>Processing mode</strong><br>${trust.processing_mode}</p>
+      <p><strong>Confidence</strong><br><span class="badge-chip ${classFromLevel(trust.confidence)}">${trust.confidence}</span></p>
+      <p><strong>Needs review</strong><br>${trust.needs_human_review ? "Yes" : "No"}</p>
+      <p><strong>Safe next step</strong><br>${safeActionFromTrust(trust)}</p>
+      <p><strong>Review reason</strong><br>${trust.review_reason}</p>
+    </div>
+  `;
+}
+
+function safeActionFromTrust(trust) {
+  if (trust.processing_mode === "verification_only") {
+    return "Verify using official contact details before acting.";
+  }
+  if (trust.processing_mode === "unsupported") {
+    return "Use a clearer upload or ask for help checking details.";
+  }
+  return "Check the original document before acting.";
+}
+
+function classFromLevel(level) {
+  if (String(level).toLowerCase().includes("high")) return "badge-high";
+  if (String(level).toLowerCase().includes("medium")) return "badge-medium";
+  return "badge-low";
+}
+
+function iconFromCard(icon) {
+  const map = {
+    document: "D",
+    alert: "A",
+    checklist: "C",
+    calendar: "K",
+    risk: "R",
+    info: "I"
+  };
+  return map[icon] || "D";
+}
+
+function statusLabel(status) {
+  const map = {
+    normal: "Normal",
+    caution: "Caution",
+    urgent: "Urgent",
+    good: "Good"
+  };
+  return map[status] || "Normal";
+}
+
+function labelForStyle(style) {
+  const labels = {
+    simple: "Simple Cards",
+    animal: "Animal Cards",
+    shape: "Shape Cards",
+    map: "Map Cards"
+  };
+  return labels[style] || "Simple Cards";
 }
 
 function showActionMessage(message) {
@@ -356,9 +414,9 @@ function setLoading(isLoading) {
   submitButton.textContent = isLoading ? "Reading..." : "Understand this document";
 }
 
-function openModal(title, markup) {
+function openModal(title, html) {
   modalTitle.textContent = title;
-  modalContent.innerHTML = markup;
+  modalContent.innerHTML = html;
   modal.classList.remove("hidden");
   document.querySelector("#modal-close").focus();
 }
@@ -367,78 +425,52 @@ function closeModal() {
   modal.classList.add("hidden");
 }
 
-function buildCheckMarkup(result) {
-  const severityClass = severityClassName(result.severity_level);
-  const trustClass = trustClassName(result.trust_level);
-  const reviewClass = result.needs_review === "Yes" ? "badge-medium" : "badge-low";
-
-  return `
-    <div class="check-grid">
-      <p><strong>Trust level</strong><br><span class="badge-chip ${trustClass}">${result.trust_level}</span></p>
-      <p><strong>Severity</strong><br><span class="badge-chip ${severityClass}">${result.severity_level}</span></p>
-      <p><strong>Document status</strong><br><span class="badge-chip ${severityClassName(result.document_status)}">${result.document_status}</span></p>
-      <p><strong>Confidence</strong><br><span class="badge-chip ${severityClassName(result.confidence)}">${result.confidence}</span></p>
-      <p><strong>Needs review</strong><br><span class="badge-chip ${reviewClass}">${result.needs_review}</span></p>
-      <p><strong>Safe next step</strong><br>${result.safe_action_message}</p>
-    </div>
-  `;
-}
-
-function severityClassName(value) {
-  const lower = String(value || "").toLowerCase();
-  if (lower.includes("high") || lower.includes("suspicious")) return "badge-high";
-  if (lower.includes("medium")) return "badge-medium";
-  return "badge-low";
-}
-
-function trustClassName(value) {
-  const lower = String(value || "").toLowerCase();
-  if (lower.includes("suspicious") || lower.includes("unclear")) return "badge-high";
-  if (lower.includes("template") || lower.includes("outgoing")) return "badge-medium";
-  return "badge-low";
-}
-
-function hasDeadline(value) {
-  return value && !String(value).toLowerCase().includes("no clear deadline");
-}
-
-function listOrText(value) {
-  if (Array.isArray(value)) return value.join(" ");
-  return value || "No extra detail found.";
-}
-
-function normalizeResult(result) {
-  const base = createMockResult();
-  const merged = { ...base, ...result };
+function normalizeApiResult(result) {
+  const fallback = createMockApiResult();
+  const cards = Array.isArray(result.cards) && result.cards.length === 6 ? result.cards : fallback.cards;
+  const trust = result.trust || fallback.trust;
 
   return {
-    ...merged,
-    important_points: merged.important_points || [base.important_points[0]],
-    next_steps: merged.next_steps || [base.next_steps[0]],
-    action: merged.action || base.action
+    ...fallback,
+    ...result,
+    trust: {
+      ...fallback.trust,
+      ...trust
+    },
+    cards: cards.map((card, index) => {
+      const fallbackCard = fallback.cards[index];
+      return {
+        ...fallbackCard,
+        ...card,
+        short_answer: card.short_answer || fallbackCard.short_answer
+      };
+    })
   };
 }
 
-function createMockResult() {
+function createMockApiResult() {
   return {
-    document_category: "other readable document",
-    document_title: "Document guide",
-    what_this_is: "A readable document.",
-    important_points: ["It may contain information you need to check."],
-    action: "Check the original document before acting.",
-    deadline: "No clear deadline found.",
-    risk: "Missing key details could cause problems.",
-    note: "Cannot confirm authenticity.",
-    next_steps: ["Use the action card first.", "Ask someone you trust if needed."],
-    trust_level: "Low - Cannot confirm authenticity",
-    severity_level: "Low",
-    document_status: "Other",
-    confidence: "Low",
-    needs_review: "No",
-    review_reason: "Some details may need checking.",
-    is_template: false,
-    is_outgoing: false,
-    is_suspicious: false,
-    safe_action_message: "Verify using official contact details before acting."
+    job_id: "mock-job",
+    trust: {
+      trust_assessment: "medium",
+      document_type: "unknown",
+      processing_mode: "caution",
+      confidence: "low",
+      needs_human_review: false,
+      review_reason: "Some details may need checking.",
+      authentic_signals: [],
+      scam_signals: [],
+      input_quality: "borderline"
+    },
+    cards: [
+      { id: "what_is_this", title: "What is this?", short_answer: "Upload a document to begin.", icon: "document", status: "normal" },
+      { id: "what_matters_most", title: "What matters most?", short_answer: "Key point appears here after upload.", icon: "alert", status: "normal" },
+      { id: "what_do_i_need_to_do", title: "What do I need to do?", short_answer: "No action needed right now.", steps: [], icon: "checklist", status: "good" },
+      { id: "when_is_it_due", title: "When is it due?", short_answer: "No deadline clearly stated.", date: null, icon: "calendar", status: "normal" },
+      { id: "what_could_happen", title: "What could happen if I ignore it?", short_answer: "No risk clearly stated.", icon: "risk", status: "normal" },
+      { id: "helpful_note", title: "Helpful note", short_answer: "No extra note.", icon: "info", status: "good" }
+    ],
+    display_text: "",
+    tts_script: ""
   };
 }

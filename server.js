@@ -3,11 +3,13 @@ const fs = require("node:fs");
 const http = require("node:http");
 const path = require("node:path");
 
-const { runLetterPipeline } = require("./src/aiPipeline");
-const { extractTextFromUpload } = require("./src/textExtraction");
+const { simplifyRoute } = require("./src/routes/simplifyRoute");
+const { loadEnvFile } = require("./src/utils/loadEnv");
+
+loadEnvFile(__dirname);
 
 const PORT = Number(process.env.PORT || 3000);
-const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 const PUBLIC_DIR = path.join(__dirname, "public");
 const UPLOAD_DIR = path.join(__dirname, "private_storage", "uploads");
 const RESULT_DIR = path.join(__dirname, "private_storage", "results");
@@ -30,13 +32,12 @@ const server = http.createServer(async (req, res) => {
       return serveStaticFile(req, res);
     }
 
-    if (req.method === "POST" && req.url === "/api/upload") {
-      return handleUpload(req, res);
+    if (req.method === "POST" && (req.url === "/api/simplify" || req.url === "/api/upload")) {
+      return handleSimplify(req, res);
     }
 
     sendJson(res, 404, { error: "Not found." });
   } catch (error) {
-    // Do not log raw letter text here. Keep logs limited to safe operational errors.
     console.error("Request failed:", error.message);
     sendJson(res, 500, { error: "Something went wrong. Please try again." });
   }
@@ -51,72 +52,64 @@ server.listen(PORT, () => {
 function ensurePrivateFolders() {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
   fs.mkdirSync(RESULT_DIR, { recursive: true });
-
-  // TODO: Add short retention deletion for raw uploaded files before production.
-  // Example: delete files older than 24 hours with a scheduled worker.
+  // TODO: Add short retention cleanup for uploads/results with a scheduled task.
 }
 
-async function handleUpload(req, res) {
+async function handleSimplify(req, res) {
   const contentType = req.headers["content-type"] || "";
-  if (!contentType.startsWith("multipart/form-data")) {
-    return sendJson(res, 400, { error: "Please upload one PDF or image." });
+  let fields = {};
+  let file = null;
+
+  if (contentType.startsWith("multipart/form-data")) {
+    const body = await readRequestBody(req, MAX_UPLOAD_BYTES);
+    const form = parseMultipartForm(body, contentType);
+    fields = form.fields;
+
+    if (form.file) {
+      if (!ALLOWED_TYPES.has(form.file.contentType)) {
+        return sendJson(res, 400, { error: "Please upload a PDF, image, DOCX, DOC, or text file." });
+      }
+
+      const jobId = crypto.randomUUID();
+      const filePath = path.join(UPLOAD_DIR, `${jobId}${extensionForType(form.file.contentType)}`);
+      fs.writeFileSync(filePath, form.file.data);
+
+      file = {
+        jobId,
+        savedPath: filePath,
+        filename: form.file.filename,
+        contentType: form.file.contentType
+      };
+    }
+  } else if (contentType.includes("application/json")) {
+    const body = await readRequestBody(req, MAX_UPLOAD_BYTES);
+    try {
+      const json = JSON.parse(body.toString("utf8"));
+      fields = {
+        pastedText: typeof json.text === "string" ? json.text : "",
+        documentCategory: typeof json.documentCategory === "string" ? json.documentCategory : "auto"
+      };
+    } catch (error) {
+      return sendJson(res, 400, { error: "Invalid JSON body." });
+    }
+  } else {
+    return sendJson(res, 400, { error: "Use multipart upload or JSON text input." });
   }
 
-  const body = await readRequestBody(req, MAX_UPLOAD_BYTES);
-  const form = parseMultipartForm(body, contentType);
-  const file = form.file;
-
-  if (!file) {
-    return sendJson(res, 400, { error: "Please choose one file." });
+  if (!file && !String(fields.pastedText || "").trim()) {
+    return sendJson(res, 400, { error: "Upload a document or provide pasted text." });
   }
 
-  if (!ALLOWED_TYPES.has(file.contentType)) {
-    return sendJson(res, 400, { error: "Please upload a PDF, image, or document file." });
-  }
-
-  const jobId = crypto.randomUUID();
-  const safeExt = extensionForType(file.contentType);
-  const savedPath = path.join(UPLOAD_DIR, `${jobId}${safeExt}`);
-
-  // Save the original upload privately. It is not inside the public folder.
-  fs.writeFileSync(savedPath, file.data);
-
-  // Extract text before the AI pipeline. OCR is a placeholder in this MVP.
-  const extractedText = await extractTextFromUpload({
-    filePath: savedPath,
-    mimeType: file.contentType,
-    originalName: file.filename
-  });
-
-  const pipelineResult = runLetterPipeline({
-    extractedText,
-    fileMeta: {
-      jobId,
-      mimeType: file.contentType,
-      originalName: file.filename,
-      sizeBytes: file.data.length,
-      selectedCategory: form.fields.documentCategory || "auto"
+  const result = await simplifyRoute({
+    file,
+    fields,
+    directories: {
+      uploadsDir: UPLOAD_DIR,
+      resultsDir: RESULT_DIR
     }
   });
 
-  const storedResult = {
-    job_id: jobId,
-    created_at: new Date().toISOString(),
-    structured_output: pipelineResult.structuredOutput,
-    user_output: pipelineResult.userOutput
-  };
-
-  // Store only structured output for now. Do not store raw extracted letter text.
-  fs.writeFileSync(
-    path.join(RESULT_DIR, `${jobId}.json`),
-    JSON.stringify(storedResult, null, 2)
-  );
-
-  // TODO: Add short retention deletion for stored structured output if required by policy.
-  sendJson(res, 200, {
-    job_id: jobId,
-    result: pipelineResult.userOutput
-  });
+  sendJson(res, 200, result);
 }
 
 function readRequestBody(req, maxBytes) {
@@ -127,7 +120,7 @@ function readRequestBody(req, maxBytes) {
     req.on("data", (chunk) => {
       totalBytes += chunk.length;
       if (totalBytes > maxBytes) {
-        reject(new Error("Upload is too large."));
+        reject(new Error("Request body is too large."));
         req.destroy();
         return;
       }
@@ -193,7 +186,6 @@ function splitBuffer(buffer, separator) {
     const part = buffer.slice(start + separator.length, next);
     const trimmed = trimBoundaryPart(part);
     if (trimmed.length) parts.push(trimmed);
-
     start = next;
   }
 

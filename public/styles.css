@@ -490,12 +490,47 @@ input[type="file"] {
   font-weight: 700;
 }
 
+.trust-banner {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 2px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.trust-banner::before {
+  content: "Trust check: ";
+  font-weight: 800;
+}
+
+.trust-high {
+  border-color: var(--low);
+}
+
+.trust-medium {
+  border-color: var(--medium);
+}
+
+.trust-low {
+  border-color: var(--high);
+}
+
 .style-marker {
   width: fit-content;
   margin-top: 10px;
   padding: 6px 10px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--cream) 75%, transparent);
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.card-status {
+  margin-top: 8px;
   color: var(--muted);
   font-size: 14px;
   font-weight: 700;
@@ -517,6 +552,16 @@ input[type="file"] {
   margin: 0;
   font-size: clamp(30px, 5vw, 52px);
   line-height: 1.05;
+  font-weight: 700;
+}
+
+.card-steps {
+  margin: 0;
+  padding-left: 22px;
+  display: grid;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 18px;
   font-weight: 700;
 }
 

@@ -1,15 +1,24 @@
-# ClearSteps
+# ClearSteps Backend Engine
 
-ClearSteps is a simple MVP web app that turns a formal letter upload into clear next steps.
+ClearSteps is a neurodiversity-first document simplifier.
 
-It is designed for neurodiverse users:
+This repository now includes a modular backend engine that powers six cue cards from one endpoint:
 
-- large readable text
-- clear spacing
-- short labels
-- one idea per line
-- calm wording
-- no chatbot
+- `POST /api/simplify`
+
+## Engine Structure
+
+- `src/prompts/trustEvaluatorPrompt.js`
+- `src/prompts/extractorPrompt.js`
+- `src/prompts/rendererPrompt.js`
+- `src/schemas/trustSchema.js`
+- `src/schemas/extractorSchema.js`
+- `src/schemas/cardSchema.js`
+- `src/services/textExtraction.js`
+- `src/services/clearStepsEngine.js`
+- `src/routes/simplifyRoute.js`
+- `src/utils/validateOutput.js`
+- `src/utils/splitDocuments.js`
 
 ## Run
 
@@ -17,18 +26,25 @@ It is designed for neurodiverse users:
 npm start
 ```
 
-Then open:
+Open `http://localhost:3000`.
 
-```text
-http://localhost:3000
+## Test
+
+```bash
+npm test
 ```
 
-## Privacy Notes
+The test suite covers:
 
-Uploaded files are saved in `private_storage/uploads`, outside the public web folder.
+1. HMRC-style payment letter
+2. NHS appointment letter
+3. Work warning letter
+4. Template with missing fields
+5. Possible scam payment letter
 
-Raw letter text is not written to normal logs.
+## Security and Privacy Notes
 
-Only structured output is saved in `private_storage/results`.
-
-Short retention deletion should be added before production.
+- Uploaded files are stored in `private_storage/uploads`.
+- Structured output is stored in `private_storage/results`.
+- Raw document text is not logged in normal logs.
+- File retention is short by default (deletes uploaded files after processing unless retention is enabled).
