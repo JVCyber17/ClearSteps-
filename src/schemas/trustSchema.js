@@ -1,16 +1,41 @@
 const trustSchema = {
-  trust_assessment: ["high", "medium", "low"],
+  trust_assessment: ["high", "medium", "low", "unknown"],
+  severity_level: ["low", "medium", "high", "urgent"],
+  urgency_level: ["none", "soon", "urgent", "immediate"],
+  document_category: [
+    "bill_or_payment",
+    "appointment",
+    "employment",
+    "education",
+    "housing",
+    "bank_or_loan",
+    "government",
+    "medical",
+    "legal_or_court",
+    "benefits",
+    "insurance",
+    "email",
+    "template",
+    "outgoing",
+    "possible_scam",
+    "unsupported",
+    "unknown"
+  ],
   document_type: ["official_incoming", "outgoing", "template", "possible_scam", "unsupported", "unknown"],
   processing_mode: ["normal", "caution", "verification_only", "unsupported"],
   confidence: ["high", "medium", "low"],
   needs_human_review: "boolean",
   review_reason: "string",
   authentic_signals: "array",
+  distrust_signals: "array",
   scam_signals: "array",
-  sender_guess: ["string", "null"],
-  is_multi_letter_input: "boolean",
+  severity_signals: "array",
   input_quality: ["good", "borderline", "poor"],
-  evidence_snippets: "array"
+  sender_guess: ["string", "null"],
+  is_template: "boolean",
+  is_outgoing: "boolean",
+  is_multi_document: "boolean",
+  safe_next_step: "string"
 };
 
 module.exports = { trustSchema };

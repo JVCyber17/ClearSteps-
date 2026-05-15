@@ -37,6 +37,26 @@ function validateValue(value, expected) {
   }
 
   if (Array.isArray(expected)) {
+    const primitiveLabels = new Set([
+      "string",
+      "number",
+      "boolean",
+      "object",
+      "function",
+      "undefined",
+      "array",
+      "null"
+    ]);
+
+    // If all entries are plain string labels that are not type keywords,
+    // treat the array as an enum list.
+    if (
+      expected.length > 0 &&
+      expected.every((entry) => typeof entry === "string" && !primitiveLabels.has(entry))
+    ) {
+      return expected.includes(value);
+    }
+
     return expected.some((entry) => validateValue(value, entry));
   }
 

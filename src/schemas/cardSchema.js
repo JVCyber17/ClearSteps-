@@ -13,7 +13,7 @@ const cardSchema = {
   id: allowedCardIds,
   title: "string",
   short_answer: "string",
-  icon: "string",
+  icon: ["string", "undefined"],
   status: allowedCardStatus,
   steps: ["array", "undefined"],
   date: ["string", "null", "undefined"]

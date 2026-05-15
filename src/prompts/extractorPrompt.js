@@ -24,6 +24,7 @@ Rules:
 - Do not guess missing information.
 - Do not add legal, medical, or financial advice.
 - If verification_only, return safe verification actions only.
+- In verification_only mode, do not tell users to pay, click, call, or reply using document details.
 - If unsupported, return unsupported and stop normal extraction.
 - If template markers are present, mention template behaviour.
 `;

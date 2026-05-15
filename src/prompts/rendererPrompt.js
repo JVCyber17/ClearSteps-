@@ -15,6 +15,9 @@ Rules:
 - Use short lines and one idea per line.
 - Keep short_answer brief.
 - Do not invent details.
+- Keep trust and severity context separate from document meaning.
+- "What matters most?" should include severity insight in simple words.
+- "Helpful note" should include trust insight in simple words.
 - If no action: "No action needed right now."
 - If no deadline: "No deadline clearly stated."
 - If no risk: "No risk clearly stated."
