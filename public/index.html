@@ -7,11 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Lexend:wght@500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=landing-hero-structure-20260602a">
   </head>
-  <body>
+  <body data-page="landing">
     <header class="topbar">
-      <button type="button" class="brand-button" data-page-link="home" aria-label="Go to home">
+      <button type="button" class="brand-button" data-page-link="landing" aria-label="Go to ClearSteps landing page">
         <span class="brand-mark">C</span>
         <span class="brand-text">ClearSteps</span>
       </button>
@@ -22,148 +22,676 @@
         <button type="button" class="top-link" data-page-link="help">Help</button>
       </nav>
 
-      <div class="mode-row">
-        <button type="button" class="mode-btn" data-theme="light" aria-label="Light mode">
-          <span class="icon">☼</span>
+      <div class="mode-row" aria-label="Comfort controls">
+        <button type="button" class="mode-btn active" data-theme="light" aria-label="Light theme">
+          <span class="top-mode-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <circle cx="12" cy="12" r="4.2"></circle>
+              <path d="M12 3.2v2"></path>
+              <path d="M12 18.8v2"></path>
+              <path d="M3.2 12h2"></path>
+              <path d="M18.8 12h2"></path>
+              <path d="m5.8 5.8 1.4 1.4"></path>
+              <path d="m16.8 16.8 1.4 1.4"></path>
+              <path d="m18.2 5.8-1.4 1.4"></path>
+              <path d="m7.2 16.8-1.4 1.4"></path>
+            </svg>
+          </span>
+          <span>Light</span>
         </button>
         <button type="button" class="mode-btn" data-theme="dark" aria-label="Dark mode">
-          <span class="icon">☾</span>
-        </button>
-        <button type="button" class="mode-btn" data-theme="night" aria-label="Night mode">
-          <span class="icon">✦</span>
+          <span class="top-mode-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M18.5 14.8A7.2 7.2 0 0 1 9.2 5.5a7.5 7.5 0 1 0 9.3 9.3z"></path>
+            </svg>
+          </span>
+          <span>Dark</span>
         </button>
         <button type="button" class="mode-btn" data-toggle="focus-mode" aria-label="Focus mode">
-          <span class="icon">◎</span>
+          <span class="top-mode-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M12 5.2 13.4 9l3.6 1.4-3.6 1.5L12 15.8l-1.4-3.9L7 10.4 10.6 9z"></path>
+              <path d="M18 15.5l.6 1.6 1.5.6-1.5.6-.6 1.6-.6-1.6-1.5-.6 1.5-.6z"></path>
+            </svg>
+          </span>
+          <span>Focus</span>
         </button>
-        <button type="button" class="mode-btn" data-toggle="dyslexia-mode" aria-label="Dyslexia mode">
-          <span class="icon">Aa</span>
+        <button type="button" class="mode-btn" data-toggle="dyslexia-mode" aria-label="Text comfort">
+          <span class="top-mode-icon text-mode-icon" aria-hidden="true">Aa</span>
+          <span>Text</span>
         </button>
-        <button type="button" class="mode-btn" data-page-link="help" aria-label="Help page">
-          <span class="icon">♥</span>
+        <button type="button" class="mode-btn" data-action="save-preferences" aria-label="Save preferences">
+          <span class="top-mode-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M12 19.2s-7-4.4-7-9.4A3.8 3.8 0 0 1 11.6 7 3.8 3.8 0 0 1 19 9.8c0 5-7 9.4-7 9.4z"></path>
+            </svg>
+          </span>
+          <span>Saved</span>
         </button>
+        <button type="button" class="colour-wheel" id="colour-wheel" aria-label="Open colour and comfort settings"></button>
       </div>
     </header>
 
     <main class="app-main">
-      <section id="page-home" class="page active" aria-labelledby="home-title">
-        <div class="home-layout">
-          <div class="home-copy">
-            <p class="eyebrow">ClearSteps</p>
-            <h1 id="home-title">Make difficult documents easier to understand.</h1>
-            <p class="lead">
-              Upload a letter, bill, email, notice, or document.
-              We explain it step by step.
-            </p>
-            <button type="button" class="primary-btn" data-page-link="journey">Start your document journey</button>
-            <p class="reassure">One step at a time. No overload.</p>
+      <section id="page-landing" class="page active" aria-labelledby="landing-title">
+        <div class="landing-story">
+          <div class="landing-doc-visual" aria-hidden="true">
+            <svg class="DocumentStackIllustration landing-document-stack-illustration" viewBox="0 0 560 520" focusable="false">
+              <defs>
+                <filter id="document-stack-sheet-shadow" x="-24%" y="-22%" width="160%" height="182%">
+                  <feDropShadow dx="0" dy="5" stdDeviation="5.2" flood-color="#344130" flood-opacity="0.12"></feDropShadow>
+                </filter>
+                <linearGradient id="document-stack-paper-face" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#fffefb"></stop>
+                  <stop offset="100%" stop-color="#f6f5ef"></stop>
+                </linearGradient>
+              </defs>
+
+              <g class="document-stack-scribble" transform="translate(214 78) rotate(-7)">
+                <ellipse cx="0" cy="0" rx="51" ry="29" transform="rotate(8)"></ellipse>
+                <ellipse cx="4" cy="1" rx="45" ry="34" transform="rotate(38)"></ellipse>
+                <ellipse cx="-2" cy="0" rx="53" ry="24" transform="rotate(-24)"></ellipse>
+                <ellipse cx="1" cy="0" rx="37" ry="27" transform="rotate(72)"></ellipse>
+                <ellipse cx="0" cy="1" rx="24" ry="17" transform="rotate(-8)"></ellipse>
+              </g>
+
+              <ellipse class="document-stack-soft-shadow" cx="250" cy="466" rx="190" ry="24"></ellipse>
+
+              <g class="document-stack-underlay document-stack-base" filter="url(#document-stack-sheet-shadow)">
+                <g transform="translate(90 344) rotate(-13 168 78)">
+                  <rect class="document-stack-sheet document-stack-sheet-faint" width="336" height="156" rx="7"></rect>
+                  <path class="document-stack-fold" d="M304 0v31h31z"></path>
+                </g>
+                <g transform="translate(112 358) rotate(-4 170 78)">
+                  <rect class="document-stack-sheet document-stack-sheet-faint" width="340" height="156" rx="7"></rect>
+                  <path class="document-stack-fold" d="M308 0v31h31z"></path>
+                </g>
+                <g transform="translate(76 374) rotate(9 171 78)">
+                  <rect class="document-stack-sheet document-stack-sheet-faint" width="342" height="156" rx="7"></rect>
+                  <path class="document-stack-fold" d="M310 0v31h31z"></path>
+                </g>
+              </g>
+
+              <g class="document-stack-papers" filter="url(#document-stack-sheet-shadow)">
+                <g transform="translate(92 132) rotate(-5 176 112)">
+                  <rect class="document-stack-sheet document-stack-sheet-mid" width="352" height="224" rx="8"></rect>
+                  <path class="document-stack-fold" d="M318 0v34h34z"></path>
+                  <text x="38" y="75" class="document-stack-title document-stack-title-green">Council Tax Notice</text>
+                  <path class="document-stack-line" d="M38 112h246"></path>
+                  <path class="document-stack-line" d="M38 142h202"></path>
+                </g>
+
+                <g transform="translate(132 190) rotate(2 170 104)">
+                  <rect class="document-stack-sheet" width="340" height="208" rx="8"></rect>
+                  <path class="document-stack-fold" d="M306 0v33h33z"></path>
+                  <text x="39" y="72" class="document-stack-title">School Letter</text>
+                  <path class="document-stack-line" d="M39 108h216"></path>
+                  <path class="document-stack-line" d="M39 137h176"></path>
+                </g>
+
+                <g transform="translate(72 250) rotate(-2 178 102)">
+                  <rect class="document-stack-sheet document-stack-sheet-front" width="356" height="204" rx="8"></rect>
+                  <path class="document-stack-fold" d="M322 0v34h34z"></path>
+                  <text x="39" y="73" class="document-stack-title">Energy Bill</text>
+                  <path class="document-stack-line" d="M39 109h235"></path>
+                  <path class="document-stack-line" d="M39 139h190"></path>
+                  <path class="document-stack-line" d="M39 169h154"></path>
+                </g>
+
+                <g transform="translate(124 302) rotate(7 182 104)">
+                  <rect class="document-stack-sheet document-stack-sheet-main" width="364" height="208" rx="8"></rect>
+                  <path class="document-stack-fold" d="M330 0v34h34z"></path>
+                  <text x="46" y="82" class="document-stack-title">Medical Form</text>
+                  <path class="document-stack-line" d="M46 122h252"></path>
+                  <path class="document-stack-line" d="M46 152h210"></path>
+                  <path class="document-stack-line" d="M46 182h178"></path>
+                </g>
+              </g>
+            </svg>
           </div>
 
-          <div class="home-map" aria-label="Journey preview">
-            <div class="map-track"></div>
-            <div class="map-stop stop-upload"><span>Upload</span></div>
-            <div class="map-stop stop-understand"><span>Understand</span></div>
-            <div class="map-stop stop-act"><span>Act</span></div>
-            <div class="map-stop stop-check"><span>Check</span></div>
-            <div class="map-shape shape-a"></div>
-            <div class="map-shape shape-b"></div>
-            <div class="map-shape shape-c"></div>
+          <div class="landing-shell">
+            <div class="landing-brand" aria-label="ClearSteps">
+              <span class="landing-mark">C</span>
+              <span>ClearSteps</span>
+            </div>
+            <h1 id="landing-title">Make difficult documents easier to understand.</h1>
+            <p class="landing-copy">
+              Upload a letter, bill, or notice.
+              <br>
+              ClearSteps turns it into simple next steps.
+            </p>
+            <button type="button" class="landing-start-btn" data-page-link="journey">
+              Start your document journey <span class="landing-arrow" aria-hidden="true"></span>
+            </button>
+          </div>
+
+          <div class="landing-cue-previews" aria-hidden="true">
+            <article class="landing-cue-preview">
+              <span class="landing-cue-icon">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <circle cx="24" cy="24" r="14"></circle>
+                  <path d="M16.8 24.4l5.1 5.1 9.7-10.8"></path>
+                </svg>
+              </span>
+              <div>
+                <strong>What it is</strong>
+                <i></i><i></i>
+              </div>
+              <span class="landing-cue-chevron"></span>
+            </article>
+            <article class="landing-cue-preview">
+              <span class="landing-cue-icon">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M17 14.5h14a2.5 2.5 0 0 1 2.5 2.5v17.5A2.5 2.5 0 0 1 31 37H17a2.5 2.5 0 0 1-2.5-2.5V17A2.5 2.5 0 0 1 17 14.5z"></path>
+                  <path d="M20 14.5v-3h8v3"></path>
+                  <path d="M19.5 23.4l2.8 2.8 6.4-6.7"></path>
+                  <path d="M19.8 31h8.8"></path>
+                </svg>
+              </span>
+              <div>
+                <strong>What to do</strong>
+                <i></i><i></i>
+              </div>
+              <span class="landing-cue-chevron"></span>
+            </article>
+            <article class="landing-cue-preview">
+              <span class="landing-cue-icon">
+                <svg viewBox="0 0 48 48" focusable="false">
+                  <path d="M16 17h16a2.3 2.3 0 0 1 2.3 2.3v14.4A2.3 2.3 0 0 1 32 36H16a2.3 2.3 0 0 1-2.3-2.3V19.3A2.3 2.3 0 0 1 16 17z"></path>
+                  <path d="M14.2 22.2h19.6"></path>
+                  <path d="M19.5 13v6"></path>
+                  <path d="M28.5 13v6"></path>
+                  <path d="M19.8 27.3h2"></path>
+                  <path d="M26.3 27.3h2"></path>
+                  <path d="M19.8 31.6h2"></path>
+                  <path d="M26.3 31.6h2"></path>
+                </svg>
+              </span>
+              <div>
+                <strong>When it matters</strong>
+                <i></i><i></i>
+              </div>
+              <span class="landing-cue-chevron"></span>
+            </article>
           </div>
         </div>
       </section>
 
-      <section id="page-journey" class="page" aria-labelledby="journey-title">
-        <div class="journey-header">
-          <p class="eyebrow">Document Journey</p>
-          <h2 id="journey-title">From confusion to clarity</h2>
-          <div class="journey-rail" aria-label="Journey steps">
-            <span class="rail-step active" data-rail="upload">Upload</span>
-            <span class="rail-step" data-rail="understand">Understand</span>
-            <span class="rail-step" data-rail="act">Act</span>
-            <span class="rail-step" data-rail="check">Check</span>
-          </div>
-        </div>
+      <section id="page-home" class="page" aria-labelledby="home-title">
+        <div class="home-dashboard">
+          <section class="home-action-panel" aria-labelledby="home-title">
+            <header class="home-dashboard-head">
+              <h1 id="home-title">What do you need help with today?</h1>
+              <p>Choose one option to get started.</p>
+              <p class="focus-helper focus-home-helper" aria-live="polite">Focus mode: start with the main upload action.</p>
+            </header>
 
-        <section class="panel upload-panel" aria-label="Upload area">
-          <h3>Choose a document</h3>
-          <form id="upload-form">
-            <label class="dropzone" for="document-file">
-              <span class="dropzone-title">Drag and drop or browse</span>
-              <span id="file-name" class="dropzone-sub">PDF, image, document</span>
-              <span class="helper-line">We will turn it into small clear steps.</span>
-            </label>
-            <input id="document-file" name="document" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+            <article class="home-primary-card">
+              <span class="home-icon-bubble home-icon-primary" aria-hidden="true">
+                <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                  <path d="M16 10h15l5 5v23H16z"></path>
+                  <path d="M31 10v6h5"></path>
+                  <path d="M20 22h12"></path>
+                  <path d="M20 28h12"></path>
+                  <path d="M20 34h12"></path>
+                </svg>
+              </span>
+              <div class="home-card-copy">
+                <h2>Understand a document</h2>
+                <p>
+                  Upload a letter, bill, notice, screenshot, or document.
+                  <br>
+                  Get the key points and next steps.
+                </p>
+                <button type="button" class="home-upload-btn" data-page-link="journey">
+                  <svg class="home-button-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M12 15V4"></path>
+                    <path d="M7.5 8.5 12 4l4.5 4.5"></path>
+                    <path d="M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15"></path>
+                  </svg>
+                  Upload a document
+                </button>
+              </div>
+            </article>
 
-            <div class="chips" role="radiogroup" aria-label="Document type">
-              <button type="button" class="chip active" data-category="auto" role="radio" aria-checked="true">Auto detect</button>
-              <button type="button" class="chip" data-category="letter" role="radio" aria-checked="false">Letter</button>
-              <button type="button" class="chip" data-category="bill" role="radio" aria-checked="false">Bill</button>
-              <button type="button" class="chip" data-category="work" role="radio" aria-checked="false">Work</button>
-              <button type="button" class="chip" data-category="medical" role="radio" aria-checked="false">Medical</button>
-              <button type="button" class="chip" data-category="school" role="radio" aria-checked="false">School</button>
-              <button type="button" class="chip" data-category="legal" role="radio" aria-checked="false">Legal</button>
-              <button type="button" class="chip" data-category="email" role="radio" aria-checked="false">Email</button>
-              <button type="button" class="chip" data-category="article" role="radio" aria-checked="false">Article</button>
-              <button type="button" class="chip" data-category="other" role="radio" aria-checked="false">Other</button>
-            </div>
+            <div class="home-card-grid" aria-label="Home options">
+              <button type="button" class="home-tile-card" data-page-link="help">
+                <span class="home-icon-bubble home-icon-lavender" aria-hidden="true">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M24 38V24"></path>
+                    <path d="M24 31c-7 0-11.5-4.5-11.5-11 7 0 11.5 4.5 11.5 11z"></path>
+                    <path d="M24 28c6.5 0 10.5-4.5 10.5-10.5C28 17.5 24 22 24 28z"></path>
+                    <path d="M16 17c2.2-4.2 5.2-6.2 8-6.2s5.8 2 8 6.2"></path>
+                    <path d="M18 38h12"></path>
+                  </svg>
+                </span>
+                <span class="home-card-copy">
+                  <strong>I feel overwhelmed</strong>
+                  <small>Get calm support before reading.</small>
+                </span>
+                <span class="home-card-arrow" aria-hidden="true"></span>
+              </button>
 
-            <div id="status" class="status" role="status" aria-live="polite"></div>
+              <button type="button" class="home-tile-card" data-feedback-open>
+                <span class="home-icon-bubble home-icon-warm" aria-hidden="true">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M12 14h24a4 4 0 0 1 4 4v12a4 4 0 0 1-4 4H23l-8 6v-6h-3a4 4 0 0 1-4-4V18a4 4 0 0 1 4-4z"></path>
+                    <path d="M18 24h.01"></path>
+                    <path d="M24 24h.01"></path>
+                    <path d="M30 24h.01"></path>
+                  </svg>
+                </span>
+                <span class="home-card-copy">
+                  <strong>Give feedback</strong>
+                  <small>Tell us what helped or felt confusing.</small>
+                </span>
+                <span class="home-card-arrow" aria-hidden="true"></span>
+              </button>
 
-            <div class="upload-actions">
-              <button type="submit" id="submit-button" class="primary-btn">Understand this document</button>
-              <button type="button" id="card-style-button" class="soft-btn">Card Style</button>
-              <button type="button" id="check-button" class="soft-btn">Document Check</button>
-            </div>
-          </form>
-        </section>
+              <article class="home-tile-card home-static-card">
+                <span class="home-icon-bubble" aria-hidden="true">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M8 18h13l4 5h15v16H8z"></path>
+                    <path d="M8 18v-5h13l4 5"></path>
+                    <path d="M13 29h22"></path>
+                  </svg>
+                </span>
+                <span class="home-card-copy">
+                  <strong>No recent documents yet</strong>
+                  <small>Your documents will appear here after you upload one.</small>
+                </span>
+              </article>
 
-        <div class="journey-main">
-          <section class="panel card-panel" aria-label="Guided card">
-            <div class="card-top">
-              <p id="card-progress" class="card-progress">1 of 6</p>
-              <button type="button" id="details-button" class="soft-btn">Details</button>
-            </div>
-            <div id="trust-banner" class="trust-banner">
-              This looks like a normal formal document.
-            </div>
-            <div id="card-style-marker" class="style-marker">Simple Cards</div>
-            <div id="card-status" class="card-status">Status: Normal</div>
-            <div id="card-icon" class="card-icon">D</div>
-            <h3 id="card-title">What is this</h3>
-            <p id="card-answer" class="card-answer">Upload a document to begin.</p>
-            <ul id="card-steps" class="card-steps hidden"></ul>
-            <div class="card-nav">
-              <button type="button" id="card-back" class="soft-btn">Back</button>
-              <button type="button" id="card-next" class="primary-btn">Next</button>
+              <article class="home-tile-card home-static-card">
+                <span class="home-icon-bubble home-icon-solid" aria-hidden="true">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M24 6.5 37 12.5v10.5c0 8.5-5.3 14.9-13 18.5-7.7-3.6-13-10-13-18.5V12.5z" style="fill: currentColor; stroke: none;"></path>
+                    <rect x="17.8" y="22.8" width="12.4" height="10.8" rx="2.2" style="fill: none; stroke: #fbfcf8;"></rect>
+                    <path d="M20.7 22.8v-3.2a3.3 3.3 0 0 1 6.6 0v3.2" style="stroke: #fbfcf8;"></path>
+                    <path d="M24 27.5v2.4" style="stroke: #fbfcf8;"></path>
+                  </svg>
+                </span>
+                <span class="home-card-copy">
+                  <strong>Private and secure</strong>
+                  <small>Your documents stay private.</small>
+                </span>
+              </article>
             </div>
           </section>
 
-          <aside class="panel action-panel" aria-label="Actions">
-            <h3>Actions</h3>
-            <div class="action-grid">
-              <button type="button" class="action-btn" id="copy-summary">Copy summary</button>
-              <button type="button" class="action-btn" id="add-calendar">Add to calendar</button>
-              <button type="button" class="action-btn" id="send-reminder">Send reminder</button>
-              <button type="button" class="action-btn" id="upload-another">Upload another document</button>
-            </div>
-            <div class="coming-row">
-              <button type="button" class="soft-btn">Read aloud</button>
-              <span>Coming soon</span>
-            </div>
-            <div class="coming-row">
-              <button type="button" class="soft-btn">Custom cards</button>
-              <span>Coming soon</span>
-            </div>
-            <div class="coming-row">
-              <button type="button" class="soft-btn">Saved preferences</button>
-              <span>Coming soon</span>
-            </div>
-            <div id="action-message" class="status" role="status" aria-live="polite"></div>
-          </aside>
-        </div>
+          <section class="home-process-panel" aria-label="How ClearSteps works">
+            <header>
+              <h2>How ClearSteps works</h2>
+              <p>A simple way to understand a document.</p>
+            </header>
 
-        <div id="achievement" class="achievement hidden" role="status" aria-live="polite">
-          <strong>Nice work.</strong>
-          <span>Your next step is ready.</span>
+            <div class="process-orbit" aria-hidden="true">
+              <svg class="process-loop-svg" viewBox="0 0 530 540" focusable="false">
+                <path class="process-structure-line" d="M98 42 C220 54 320 96 432 148"></path>
+                <path class="process-structure-line" d="M98 326 C224 284 324 214 432 148"></path>
+                <path class="process-structure-line" d="M98 326 C224 352 338 388 432 408"></path>
+              </svg>
+
+              <div class="process-step process-upload">
+                <span class="process-icon-circle">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M17 31h-2a7 7 0 0 1-.5-13.9A10 10 0 0 1 33 14.7A8.5 8.5 0 0 1 34 31h-3"></path>
+                    <path d="M24 32V20"></path>
+                    <path d="m18.5 25.5 5.5-5.5 5.5 5.5"></path>
+                  </svg>
+                </span>
+                <strong>Upload</strong>
+                <small>Add your document</small>
+              </div>
+
+              <div class="process-step process-understand">
+                <span class="process-icon-circle">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M13 8h17l6 6v23H13z"></path>
+                    <path d="M30 8v7h6"></path>
+                    <path d="M19 22h11"></path>
+                    <path d="M19 28h8"></path>
+                    <circle cx="33" cy="33" r="5.2"></circle>
+                    <path d="m36.8 36.8 4.2 4.2"></path>
+                  </svg>
+                </span>
+                <strong>Understand</strong>
+                <small>We explain it simply</small>
+              </div>
+
+              <div class="process-step process-check">
+                <span class="process-icon-circle">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M15 8h18v32H15z"></path>
+                    <path d="M19.5 18.5 22 21l5-5.5"></path>
+                    <path d="M30 19h4"></path>
+                    <path d="M19.5 29.5 22 32l5-5.5"></path>
+                    <path d="M30 30h4"></path>
+                  </svg>
+                </span>
+                <strong>Check</strong>
+                <small>We highlight key details</small>
+              </div>
+
+              <div class="process-step process-act">
+                <span class="process-icon-circle">
+                  <svg class="home-svg-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M16 39V10"></path>
+                    <path d="M16 12h17l-3.5 6 3.5 6H16"></path>
+                    <path d="M12 39h11"></path>
+                  </svg>
+                </span>
+                <strong>Act</strong>
+                <small>You choose what to do next</small>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="page-journey" class="page journey-page upload-active" aria-labelledby="journey-title">
+        <div class="journey-shell">
+          <h1 id="journey-title">Start with one document</h1>
+          <p class="journey-upload-subtitle">Upload a file and we&rsquo;ll turn it into clear next steps.</p>
+          <p class="focus-helper focus-upload-helper" aria-live="polite">Focus mode: choose one file, then press Understand this document.</p>
+          <div class="journey-rail" aria-label="Journey steps">
+            <button type="button" class="rail-step active" data-rail="upload">
+              <span class="emoji-icon rail-emoji">&#x1f4e4;</span>
+              Upload
+            </button>
+            <button type="button" class="rail-step" data-rail="understand">
+              <span class="emoji-icon rail-emoji">&#x1f9e0;</span>
+              Understand
+            </button>
+            <button type="button" class="rail-step" data-rail="act">
+              <span class="emoji-icon rail-emoji">&#x2705;</span>
+              Act
+            </button>
+            <button type="button" class="rail-step" data-rail="check">
+              <span class="emoji-icon rail-emoji">&#x1f50d;</span>
+              Check
+            </button>
+          </div>
+
+          <section class="upload-panel" aria-label="Upload area">
+            <form id="upload-form">
+              <label class="dropzone" for="document-file">
+                <span class="upload-hero-icon" aria-hidden="true">
+                  <svg class="upload-line-icon" viewBox="0 0 48 48" focusable="false">
+                    <path d="M17 31h-2a7 7 0 0 1-.5-13.9A10 10 0 0 1 33 14.7A8.5 8.5 0 0 1 34 31h-3"></path>
+                    <path d="M24 32V20"></path>
+                    <path d="m18.5 25.5 5.5-5.5 5.5 5.5"></path>
+                  </svg>
+                </span>
+                <span class="dropzone-title">Drag and drop or <span>browse</span></span>
+                <span id="file-name" class="dropzone-sub">PDF, image, or document</span>
+              </label>
+              <input id="document-file" name="document" type="file" accept="application/pdf,image/jpeg,image/png,image/webp,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+
+              <div class="document-type-row">
+                <div class="chips" role="radiogroup" aria-label="Document type">
+                  <button type="button" class="chip active" data-category="auto" role="radio" aria-checked="true">
+                    <svg class="chip-line-icon smart-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                      <path d="M12 6l1.35 3.6L17 11l-3.65 1.4L12 16l-1.35-3.6L7 11l3.65-1.4L12 6z"></path>
+                      <path d="M5 4h3"></path>
+                      <path d="M4 5v3"></path>
+                      <path d="M19 4h-3"></path>
+                      <path d="M20 5v3"></path>
+                      <path d="M5 20h3"></path>
+                      <path d="M4 19v-3"></path>
+                      <path d="M19 20h-3"></path>
+                      <path d="M20 19v-3"></path>
+                    </svg>
+                    Auto detect
+                  </button>
+                  <button type="button" class="chip" data-category="letter" role="radio" aria-checked="false">
+                    <svg class="chip-line-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                      <path d="M6 4h9l3 3v13H6z"></path>
+                      <path d="M15 4v4h3"></path>
+                      <path d="M9 12h6"></path>
+                      <path d="M9 16h6"></path>
+                    </svg>
+                    Letter
+                  </button>
+                  <button type="button" class="chip" data-category="bill" role="radio" aria-checked="false">
+                    <svg class="chip-line-icon bill-line-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                      <path d="M6.5 3.8h8.1l3.2 3.2v13.2H6.5z"></path>
+                      <path d="M14.6 3.8v3.7h3.2"></path>
+                      <path d="M12 8.8v6.7"></path>
+                      <path d="M14.1 10.2c-.48-.42-1.12-.64-1.92-.64-1.02 0-1.72.42-1.72 1.08 0 1.42 3.46 1 3.46 2.58 0 .82-.74 1.34-1.86 1.34-.78 0-1.5-.22-2.04-.68"></path>
+                    </svg>
+                    Bill
+                  </button>
+                  <div class="more-type-wrapper">
+                    <button type="button" id="more-type-button" class="more-type-button" aria-expanded="false" aria-controls="more-type-menu">
+                      <svg class="chip-line-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <circle cx="6" cy="12" r="1.3"></circle>
+                        <circle cx="12" cy="12" r="1.3"></circle>
+                        <circle cx="18" cy="12" r="1.3"></circle>
+                      </svg>
+                      <span data-more-label>More</span>
+                    </button>
+                    <div id="more-type-menu" class="more-type-menu hidden" role="menu">
+                      <button type="button" class="chip more-type-option" data-category="work" role="radio" aria-checked="false">Work</button>
+                      <button type="button" class="chip more-type-option" data-category="medical" role="radio" aria-checked="false">Medical</button>
+                      <button type="button" class="chip more-type-option" data-category="school" role="radio" aria-checked="false">School</button>
+                      <button type="button" class="chip more-type-option" data-category="legal" role="radio" aria-checked="false">Legal</button>
+                      <button type="button" class="chip more-type-option" data-category="email" role="radio" aria-checked="false">Email</button>
+                      <button type="button" class="chip more-type-option" data-category="article" role="radio" aria-checked="false">Article</button>
+                      <button type="button" class="chip more-type-option" data-category="other" role="radio" aria-checked="false">Other</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div id="status" class="ready-message hidden" role="status" aria-live="polite">
+                <span class="ready-check" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M6 12.5l4 4L18 8"></path>
+                  </svg>
+                </span>
+                <span class="ready-copy">
+                  <strong data-status-title>Document ready</strong>
+                  <span data-status-detail></span>
+                </span>
+                <button type="button" id="remove-document" class="ready-remove" aria-label="Remove selected document">
+                  <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                    <path d="M6 6l12 12"></path>
+                    <path d="M18 6L6 18"></path>
+                  </svg>
+                </button>
+              </div>
+
+              <div class="upload-actions">
+                <button type="submit" id="submit-button" class="primary-btn">Understand this document <span aria-hidden="true">&rarr;</span></button>
+                <button type="button" id="card-style-button" class="outline-btn" hidden>Card style</button>
+                <button type="button" id="check-button" class="outline-btn" hidden>Document check</button>
+              </div>
+
+              <div class="privacy-note" aria-label="Privacy reassurance">
+                <span class="privacy-note-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M12 3l7 3v5c0 4.4-2.8 7.8-7 10-4.2-2.2-7-5.6-7-10V6z"></path>
+                    <path d="M9.5 11.5h5v4h-5z"></path>
+                    <path d="M10.5 11.5V10a1.5 1.5 0 0 1 3 0v1.5"></path>
+                  </svg>
+                </span>
+                <span>
+                  <strong>Private and secure</strong>
+                  <small>Your document stays private and is never shared.</small>
+                </span>
+              </div>
+            </form>
+          </section>
+
+          <div class="results-head">
+            <div>
+              <h1>Understand your document</h1>
+              <p>We break it into clear cards, one step at a time.</p>
+              <p class="focus-helper focus-card-helper" aria-live="polite">Focus mode: one card at a time. Actions are hidden until you exit Focus.</p>
+            </div>
+          </div>
+
+          <div class="journey-main">
+            <div class="result-card-stack">
+              <section class="cue-card-panel" aria-label="Guided card">
+                <div class="card-top">
+                  <div class="card-top-left">
+                    <p id="card-progress" class="card-progress">Card 1 of 6</p>
+                    <button type="button" id="card-style-marker" class="style-pill">Simple view</button>
+                    <button type="button" id="card-focus-toggle" class="focus-card-toggle" aria-pressed="false">
+                      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                        <circle cx="12" cy="12" r="6.5"></circle>
+                        <path d="M12 3v3"></path>
+                        <path d="M12 18v3"></path>
+                        <path d="M3 12h3"></path>
+                        <path d="M18 12h3"></path>
+                      </svg>
+                      <span>Focus on card</span>
+                    </button>
+                  </div>
+                  <div id="progress-dots" class="progress-dots" aria-label="Cue card progress"></div>
+                </div>
+
+                <div class="card-divider"></div>
+
+                <div class="cue-card-content">
+                  <div id="card-icon" class="cue-logo" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M8 4h6l3 3v13H8z"></path>
+                      <path d="M14 4v4h4"></path>
+                      <path d="M10.5 11h5"></path>
+                      <path d="M10.5 14h5"></path>
+                      <path d="M10.5 17h3.5"></path>
+                    </svg>
+                  </div>
+                  <h2 id="card-title">What is this?</h2>
+                  <p id="card-answer" class="card-answer">This looks like a formal document.</p>
+                  <p id="card-explanation" class="card-explanation">It can be read clearly, so we can pull out the key points.</p>
+                  <ul id="card-steps" class="card-steps hidden"></ul>
+                </div>
+
+                <div class="card-nav">
+                  <button type="button" id="card-back" class="outline-btn">&larr; Back</button>
+                  <button type="button" id="card-next" class="primary-btn">Next &rarr;</button>
+                </div>
+              </section>
+              <p id="card-feedback" class="micro-feedback">Good start. Let's go one card at a time.</p>
+            </div>
+
+            <aside class="action-panel" aria-label="Actions">
+              <h2>Actions</h2>
+              <div class="action-grid">
+                <button type="button" class="action-btn" id="copy-summary">
+                  <span class="action-icon action-copy" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <rect x="8" y="7" width="10" height="12" rx="1.7"></rect>
+                      <path d="M6 16V6.8C6 5.8 6.8 5 7.8 5H15"></path>
+                      <path d="M11 11h4"></path>
+                      <path d="M11 14h3.2"></path>
+                    </svg>
+                  </span>
+                  Copy summary
+                </button>
+                <button type="button" class="action-btn" id="review-check">
+                  <span class="action-icon action-check" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M7 4.5h7l3 3V14"></path>
+                      <path d="M14 4.5v4h4"></path>
+                      <path d="M9.5 11h4.5"></path>
+                      <path d="M9.5 14h2.8"></path>
+                      <circle cx="16.4" cy="16.4" r="2.8"></circle>
+                      <path d="M18.4 18.4l2 2"></path>
+                    </svg>
+                  </span>
+                  Document check
+                </button>
+                <button type="button" class="action-btn" id="add-calendar">
+                  <span class="action-icon action-calendar" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <rect x="5.5" y="6.5" width="13" height="12" rx="2"></rect>
+                      <path d="M8.5 4.5v4"></path>
+                      <path d="M15.5 4.5v4"></path>
+                      <path d="M5.5 10h13"></path>
+                      <path d="M8.8 13.2h1.5"></path>
+                      <path d="M13.7 13.2h1.5"></path>
+                      <path d="M8.8 16h1.5"></path>
+                      <path d="M13.7 16h1.5"></path>
+                    </svg>
+                  </span>
+                  Add to calendar
+                </button>
+                <button type="button" class="action-btn" id="send-reminder">
+                  <span class="action-icon action-reminder" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M8 16.5h8"></path>
+                      <path d="M10 19h4"></path>
+                      <path d="M7.5 16.5l1-1.5v-3.2a3.5 3.5 0 0 1 7 0V15l1 1.5"></path>
+                      <path d="M10.2 6.8a2 2 0 0 1 3.6 0"></path>
+                    </svg>
+                  </span>
+                  Send reminder
+                </button>
+                <button type="button" class="action-btn" id="upload-another">
+                  <span class="action-icon action-upload" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M8.1 16.7H7.3a3.5 3.5 0 0 1-.2-7 4.8 4.8 0 0 1 9.1 1.2 3.1 3.1 0 0 1 .5 5.8h-.9"></path>
+                      <path d="M12 16.7V9.8"></path>
+                      <path d="M9.3 12.5 12 9.8l2.7 2.7"></path>
+                    </svg>
+                  </span>
+                  Upload another document
+                </button>
+                <button type="button" class="action-btn" id="give-feedback">
+                  <span class="action-icon action-feedback" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M6.5 7.4c0-1 .8-1.8 1.8-1.8h7.4c1 0 1.8.8 1.8 1.8v5.3c0 1-.8 1.8-1.8 1.8H11l-3.7 3v-3h-1V7.4z"></path>
+                      <path d="M9.6 10.2h.01"></path>
+                      <path d="M12 10.2h.01"></path>
+                      <path d="M14.4 10.2h.01"></path>
+                    </svg>
+                  </span>
+                  Give feedback
+                </button>
+              </div>
+
+              <div id="action-message" class="action-message" role="status" aria-live="polite"></div>
+            </aside>
+          </div>
+
+          <div id="achievement" class="achievement hidden" role="status" aria-live="polite">
+            <span class="celebration-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false">
+                <path d="M5 19l4-10 6 6-10 4z"></path>
+                <path d="M9 9l6 6"></path>
+                <path d="M15.5 5.5h.01"></path>
+                <path d="M18.5 8.5l2-2"></path>
+                <path d="M18 12.5l3 .6"></path>
+                <path d="M12.5 4.5l.8-2.5"></path>
+              </svg>
+            </span>
+            <span><strong>Hurray, you completed this section.</strong> Great job, your journey is clearer now.</span>
+          </div>
+
+          <section id="card-feedback-panel" class="short-feedback-panel hidden" data-feedback-context="after_cards" aria-label="Feedback after cue cards">
+            <h2>Was this helpful?</h2>
+            <div class="feedback-rating-row" role="group" aria-label="Feedback rating">
+              <button type="button" class="feedback-rating-btn" data-rating="Yes, this helped">Yes, this helped</button>
+              <button type="button" class="feedback-rating-btn" data-rating="A little">A little</button>
+              <button type="button" class="feedback-rating-btn" data-rating="No, I was confused">No, I was confused</button>
+            </div>
+            <label class="feedback-label" for="card-feedback-comment">What could be clearer?</label>
+            <textarea id="card-feedback-comment" class="short-feedback-comment" maxlength="240" placeholder="A short note is enough."></textarea>
+            <div class="optional-contact">
+              <p><strong>Optional</strong><br>Leave your email or phone number if you are happy for us to contact you about your feedback.</p>
+              <label class="feedback-label" for="card-feedback-contact">Email or phone number</label>
+              <input id="card-feedback-contact" class="feedback-contact-input" type="text" placeholder="Only if you want us to contact you">
+              <small>We will only use this to ask about your feedback.</small>
+            </div>
+            <button type="button" class="primary-btn send-short-feedback">Send feedback</button>
+            <p class="feedback-saved-message" role="status" aria-live="polite"></p>
+          </section>
         </div>
       </section>
 
@@ -171,29 +699,210 @@
         <div class="help-layout">
           <div class="help-head">
             <p class="eyebrow">Help</p>
-            <h2 id="help-title">Support when things feel hard</h2>
+            <h1 id="help-title">Support when<br>things feel hard</h1>
+            <p class="focus-helper focus-help-helper" aria-live="polite">Focus mode: choose one support card. Details open in a small popup.</p>
           </div>
 
           <div class="help-cards">
-            <button type="button" class="help-card" data-help="overwhelmed">I feel overwhelmed</button>
-            <button type="button" class="help-card" data-help="fake">I think this document is fake</button>
-            <button type="button" class="help-card" data-help="deadline">I cannot find the deadline</button>
-            <button type="button" class="help-card" data-help="time">I need more time</button>
-            <button type="button" class="help-card" data-help="person">I need someone to help me</button>
-            <button type="button" class="help-card" data-help="wrong">I uploaded the wrong file</button>
+            <button type="button" class="help-card" data-help="overwhelmed">
+              <span class="help-icon-bubble lavender" aria-hidden="true">
+                <svg class="help-line-icon" viewBox="0 0 32 32" focusable="false">
+                  <path d="M16 7c-5 0-9 3.6-9 8.2 0 4.8 3.8 8.8 8.8 8.8 4.4 0 7.2-2.8 7.2-6.2 0-3.2-2.4-5.4-5.2-5.4-2.6 0-4.5 1.8-4.5 4 0 2 1.5 3.4 3.4 3.4 1.6 0 2.8-1 2.8-2.3"></path>
+                </svg>
+              </span>
+              <strong>I feel overwhelmed</strong>
+              <span class="help-card-arrow" aria-hidden="true">&rsaquo;</span>
+            </button>
+            <button type="button" class="help-card" data-help="fake">
+              <span class="help-icon-bubble sage" aria-hidden="true">
+                <svg class="help-line-icon" viewBox="0 0 32 32" focusable="false">
+                  <path d="M16 5.5 25 9v6.2c0 5.5-3.4 9.4-9 11.3-5.6-1.9-9-5.8-9-11.3V9z"></path>
+                  <path d="m12.5 12.5 7 7"></path>
+                  <path d="m19.5 12.5-7 7"></path>
+                </svg>
+              </span>
+              <strong>I think this document is fake</strong>
+              <span class="help-card-arrow" aria-hidden="true">&rsaquo;</span>
+            </button>
+            <button type="button" class="help-card" data-help="deadline">
+              <span class="help-icon-bubble blue" aria-hidden="true">
+                <svg class="help-line-icon" viewBox="0 0 32 32" focusable="false">
+                  <path d="M8 9.5h16v15H8z"></path>
+                  <path d="M11.5 6.5v5"></path>
+                  <path d="M20.5 6.5v5"></path>
+                  <path d="M8 14h16"></path>
+                  <path d="M12 18h3"></path>
+                  <path d="M17 18h3"></path>
+                  <path d="M12 22h3"></path>
+                </svg>
+              </span>
+              <strong>I cannot find the deadline</strong>
+              <span class="help-card-arrow" aria-hidden="true">&rsaquo;</span>
+            </button>
+            <button type="button" class="help-card" data-help="time">
+              <span class="help-icon-bubble cream" aria-hidden="true">
+                <svg class="help-line-icon" viewBox="0 0 32 32" focusable="false">
+                  <circle cx="16" cy="16" r="10"></circle>
+                  <path d="M16 10.5V16l4 2.5"></path>
+                </svg>
+              </span>
+              <strong>I need more time</strong>
+              <span class="help-card-arrow" aria-hidden="true">&rsaquo;</span>
+            </button>
+            <button type="button" class="help-card" data-help="wrong">
+              <span class="help-icon-bubble sage" aria-hidden="true">
+                <svg class="help-line-icon" viewBox="0 0 32 32" focusable="false">
+                  <path d="M10 23h12a4 4 0 0 0 .8-7.9 6.8 6.8 0 0 0-13.1-1.8A5 5 0 0 0 10 23z"></path>
+                  <path d="M16 22V13"></path>
+                  <path d="m12.8 16.2 3.2-3.2 3.2 3.2"></path>
+                </svg>
+              </span>
+              <strong>I uploaded the wrong file</strong>
+              <span class="help-card-arrow" aria-hidden="true">&rsaquo;</span>
+            </button>
+            <button type="button" class="help-card" data-help="person">
+              <span class="help-icon-bubble lavender" aria-hidden="true">
+                <svg class="help-line-icon" viewBox="0 0 32 32" focusable="false">
+                  <circle cx="12.5" cy="12" r="3.2"></circle>
+                  <circle cx="20.5" cy="12.5" r="2.8"></circle>
+                  <path d="M7 24c.8-4 3-6 5.5-6s4.7 2 5.5 6"></path>
+                  <path d="M17.5 24c.7-3 2.4-4.6 4.5-4.6 1.8 0 3.2 1.2 4 4.6"></path>
+                </svg>
+              </span>
+              <strong>I need someone to help me</strong>
+              <span class="help-card-arrow" aria-hidden="true">&rsaquo;</span>
+            </button>
+          </div>
+
+          <div class="help-simple-sections">
+            <section class="help-simple-card">
+              <h2>Write to ClearSteps</h2>
+              <p>Tell us what felt clear or confusing.</p>
+              <button type="button" class="soft-purple-btn" data-feedback-open>Give feedback</button>
+            </section>
+            <section class="help-simple-card">
+              <h2>Need outside help?</h2>
+              <p>Ask someone you trust, or contact the organisation using official details.</p>
+            </section>
+          </div>
+
+          <p class="help-safety-note">If you or someone else is in immediate danger, call 999. ClearSteps is not an emergency service.</p>
+        </div>
+      </section>
+
+      <section id="page-comfort" class="page" aria-labelledby="comfort-title">
+        <div class="comfort-layout">
+          <div class="comfort-actions">
+            <button type="button" class="back-home-btn" data-page-link="home">&larr; Back to home</button>
+            <button type="button" class="back-home-btn secondary" data-page-link="journey">Back to document journey</button>
+          </div>
+          <div class="comfort-head">
+            <span class="comfort-eyebrow">Accessibility settings</span>
+            <h1 id="comfort-title">Make ClearSteps comfortable for you<span class="green-dot">.</span></h1>
+            <p>Choose settings that make reading feel easier.</p>
+          </div>
+
+          <div class="comfort-grid visual-only">
+            <section class="comfort-panel settings-panel" aria-label="Comfort settings">
+              <h2>
+                <span class="settings-heading-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" focusable="false">
+                    <path d="M4 7h10"></path>
+                    <path d="M18 7h2"></path>
+                    <path d="M4 17h2"></path>
+                    <path d="M10 17h10"></path>
+                    <circle cx="16" cy="7" r="2"></circle>
+                    <circle cx="8" cy="17" r="2"></circle>
+                  </svg>
+                </span>
+                Reading comfort
+              </h2>
+              <div class="settings-section">
+                <p>Colour style</p>
+                <div class="colour-style-row">
+                  <button type="button" class="colour-style selected" data-colour-style="calm"><span class="swatch calm-swatch"></span>Calm</button>
+                  <button type="button" class="colour-style" data-colour-style="lavender"><span class="swatch lavender-swatch"></span>Soft Lavender</button>
+                  <button type="button" class="colour-style" data-colour-style="cream"><span class="swatch cream-swatch"></span>Warm Cream</button>
+                  <button type="button" class="colour-style" data-colour-style="sage"><span class="swatch sage-swatch"></span>Sage Focus</button>
+                  <button type="button" class="colour-style" data-colour-style="classic"><span class="swatch classic-swatch"></span>Classic</button>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <p>Background style</p>
+                <div class="background-style-grid">
+                  <button type="button" class="background-style-choice selected" data-background-style="plain"><span class="background-preview"></span><span>Plain calm</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="dots"><span class="background-preview"></span><span>Soft dots</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="shapes"><span class="background-preview"></span><span>Soft shapes</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="notebook"><span class="background-preview"></span><span>School notebook</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="cozy"><span class="background-preview"></span><span>Cozy room</span></button>
+                </div>
+
+                <details id="playful-backgrounds" class="playful-backgrounds">
+                  <summary>Show playful backgrounds</summary>
+                  <div class="background-style-grid playful-grid">
+                  <button type="button" class="background-style-choice" data-background-style="animals"><span class="background-preview"></span><span>Gentle animals</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="dinosaurs"><span class="background-preview"></span><span>Dinosaurs</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="space"><span class="background-preview"></span><span>Space stars</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="ocean"><span class="background-preview"></span><span>Ocean waves</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="cars"><span class="background-preview"></span><span>Cars</span></button>
+                  <button type="button" class="background-style-choice" data-background-style="heroes"><span class="background-preview"></span><span>Soft superheroes</span></button>
+                  </div>
+                </details>
+              </div>
+
+              <div class="settings-section">
+                <p>Text size</p>
+                <div class="segmented">
+                  <button type="button" class="text-size-btn" data-text-size="small"><strong>Aa</strong>Smaller</button>
+                  <button type="button" class="text-size-btn selected" data-text-size="medium"><strong>Aa</strong>Medium</button>
+                  <button type="button" class="text-size-btn" data-text-size="large"><strong>Aa</strong>Larger</button>
+                </div>
+              </div>
+
+              <div class="settings-section">
+                <p>Reading card style</p>
+                <div class="card-style-row">
+                  <button type="button" class="card-style-choice selected" data-card-style-choice="soft"><span></span><strong>Soft rounded</strong><small>Gentle corners and padding</small></button>
+                  <button type="button" class="card-style-choice" data-card-style-choice="standard"><span></span><strong>Standard</strong><small>More defined edges</small></button>
+                </div>
+              </div>
+
+              <div class="settings-section preview-section" aria-label="Live preview">
+                <p>Preview</p>
+                <div class="comfort-preview-card">
+                  <span class="comfort-preview-icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M7 4h7l3 3v13H7z"></path>
+                      <path d="M14 4v4h4"></path>
+                      <path d="M9.5 11h5"></path>
+                      <path d="M9.5 14h5"></path>
+                    </svg>
+                  </span>
+                  <small>What is this?</small>
+                  <strong>This looks like a formal document.</strong>
+                  <span>Good start. One step at a time.</span>
+                </div>
+              </div>
+
+              <button type="button" id="save-comfort" class="comfort-save-btn">Save preferences</button>
+              <p class="saved-on-device">Saved on this device. You can change this anytime.</p>
+            </section>
           </div>
         </div>
       </section>
     </main>
 
+    <button type="button" class="bottom-feedback-link" data-feedback-open>Give quick feedback</button>
+
     <div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-box">
-        <button type="button" id="modal-close" class="soft-btn">Close</button>
-        <h3 id="modal-title">Details</h3>
+        <button type="button" id="modal-close" class="modal-close" aria-label="Go back">Back</button>
+        <h2 id="modal-title">Details</h2>
         <div id="modal-content"></div>
       </div>
     </div>
 
-    <script src="/app.js"></script>
+    <script src="/app.js?v=landing-hero-structure-20260602a"></script>
   </body>
 </html>

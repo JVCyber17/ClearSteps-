@@ -710,17 +710,20 @@ function extractActions(text, trust) {
 
   const lower = String(text || "").toLowerCase();
   const actions = [];
+  const paymentLikeCategory = ["bill_or_payment", "bank_or_loan", "housing"].includes(trust.document_category);
+  const explicitPaymentRequest = /\b(pay|payment|settle|amount due|balance due|overdue|arrears|final notice)\b/.test(lower);
+  const hasMoneyAmount = extractMoneyAmounts(text).length > 0;
 
-  if (/\b(pay|payment|settle)\b/.test(lower)) {
+  if (paymentLikeCategory && explicitPaymentRequest && (hasMoneyAmount || /\b(due|overdue|arrears|final notice)\b/.test(lower))) {
     actions.push("Check the payment amount and due date.");
   }
-  if (/\b(contact|phone|call|email|reply)\b/.test(lower)) {
+  if (/\b(please contact|contact us|call us|reply by|email us|phone us)\b/.test(lower)) {
     actions.push("Contact the sender using trusted contact details.");
   }
-  if (/\b(attend|appointment|meeting)\b/.test(lower)) {
+  if (trust.document_category === "appointment" || /\b(must attend|please attend|your appointment|meeting to attend)\b/.test(lower)) {
     actions.push("Attend the appointment or meeting.");
   }
-  if (/\b(send|submit|provide|complete|fill)\b/.test(lower)) {
+  if (/\b(send us|submit|provide evidence|complete the form|fill in|return the form)\b/.test(lower)) {
     actions.push("Send the requested documents or form.");
   }
 
@@ -732,7 +735,7 @@ function extractActions(text, trust) {
 }
 
 function extractMoneyAmounts(text) {
-  return String(text || "").match(/£\s?\d+(?:[.,]\d{2})?/g) || [];
+  return String(text || "").match(/(?:£|GBP)\s?\d+(?:[.,]\d{2})?/gi) || [];
 }
 
 function extractReferenceNumbers(text) {

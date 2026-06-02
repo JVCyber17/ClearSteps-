@@ -87,7 +87,9 @@ async function handleSimplify(req, res) {
       const json = JSON.parse(body.toString("utf8"));
       fields = {
         pastedText: typeof json.text === "string" ? json.text : "",
-        documentCategory: typeof json.documentCategory === "string" ? json.documentCategory : "auto"
+        documentCategory: typeof json.documentCategory === "string" ? json.documentCategory : "auto",
+        action: typeof json.action === "string" ? json.action : "",
+        jobId: typeof json.job_id === "string" ? json.job_id : ""
       };
     } catch (error) {
       return sendJson(res, 400, { error: "Invalid JSON body." });
@@ -96,7 +98,8 @@ async function handleSimplify(req, res) {
     return sendJson(res, 400, { error: "Use multipart upload or JSON text input." });
   }
 
-  if (!file && !String(fields.pastedText || "").trim()) {
+  const isStoredAnalysisRequest = fields.action === "analyse" && fields.jobId;
+  if (!file && !String(fields.pastedText || "").trim() && !isStoredAnalysisRequest) {
     return sendJson(res, 400, { error: "Upload a document or provide pasted text." });
   }
 
@@ -218,7 +221,8 @@ function extensionForType(contentType) {
 }
 
 function serveStaticFile(req, res) {
-  const cleanUrl = req.url === "/" ? "/index.html" : req.url.split("?")[0];
+  const pathOnly = req.url.split("?")[0] || "/";
+  const cleanUrl = pathOnly === "/" ? "/index.html" : pathOnly;
   const decodedPath = decodeURIComponent(cleanUrl);
   const requestedPath = path.normalize(path.join(PUBLIC_DIR, decodedPath));
 
