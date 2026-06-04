@@ -17,6 +17,7 @@ const {
   markOcrCompleted,
   markOcrFailed
 } = require("../services/documentSessionService");
+const { applyAiStructuredResult } = require("../services/aiStructuredResultService");
 
 const OCR_SESSION_TTL_MS = 30 * 60 * 1000;
 const ocrSessionStore = new Map();
@@ -140,7 +141,7 @@ async function simplifyRoute({ file, fields, directories }) {
     return unreadableDocumentResponse();
   }
 
-  const run = analyseDocumentText(extractedText, {
+  const run = await analyseDocumentText(extractedText, {
     jobId,
     mimeType,
     originalName,
@@ -149,16 +150,12 @@ async function simplifyRoute({ file, fields, directories }) {
   });
 
   const output = run.api_output;
-  const structured = run.structured_output;
 
-  // Store only structured output, not raw text.
+  // Store safe processing metadata only. The API response still returns cue cards,
+  // but local disk does not retain document-derived text, OCR text, or raw AI output.
   fs.writeFileSync(
     path.join(resultsDir, `${output.job_id}.json`),
-    JSON.stringify({
-      job_id: output.job_id,
-      created_at: output.debug.created_at,
-      structured_output: structured
-    }, null, 2)
+    JSON.stringify(buildSafeStoredResult(output), null, 2)
   );
 
   await markDocumentSessionAnalysed(jobId, output, {
@@ -280,7 +277,7 @@ async function analyseStoredDocument({ jobId, selectedCategory, anonymousSession
     documentCategory: selectedCategory
   });
 
-  const run = analyseDocumentText(storedDocument.extractedText, {
+  const run = await analyseDocumentText(storedDocument.extractedText, {
     jobId,
     mimeType: storedDocument.mimeType,
     originalName: storedDocument.originalName,
@@ -289,16 +286,11 @@ async function analyseStoredDocument({ jobId, selectedCategory, anonymousSession
   });
 
   const output = run.api_output;
-  const structured = run.structured_output;
 
-  // Store only structured output, not raw extracted text.
+  // Store safe processing metadata only. The temporary OCR text is deleted below.
   fs.writeFileSync(
     path.join(resultsDir, `${output.job_id}.json`),
-    JSON.stringify({
-      job_id: output.job_id,
-      created_at: output.debug.created_at,
-      structured_output: structured
-    }, null, 2)
+    JSON.stringify(buildSafeStoredResult(output), null, 2)
   );
 
   await markDocumentSessionAnalysed(jobId, output, {
@@ -314,13 +306,53 @@ async function analyseStoredDocument({ jobId, selectedCategory, anonymousSession
   return output;
 }
 
-function analyseDocumentText(extractedText, fileMeta = {}) {
-  // Placeholder analysis layer until the full AI call is connected.
-  // It already returns the six ClearSteps cue cards from the extracted text.
-  return runClearStepsEngine({
+async function analyseDocumentText(extractedText, fileMeta = {}) {
+  const rulesRun = runClearStepsEngine({
     extractedText,
     fileMeta
   });
+
+  // Optional backend-only AI pass. If it is unavailable, slow, invalid, or unsafe,
+  // the existing rules-based result is returned unchanged.
+  return await applyAiStructuredResult({
+    rulesRun,
+    extractedText
+  });
+}
+
+function buildSafeStoredResult(output = {}) {
+  const trust = output.trust || {};
+  const ai = output.debug?.ai || {};
+
+  return {
+    job_id: output.job_id,
+    created_at: output.debug?.created_at,
+    status: "analysed",
+    cards_count: Array.isArray(output.cards) ? output.cards.length : 0,
+    trust: {
+      trust_assessment: trust.trust_assessment,
+      severity_level: trust.severity_level,
+      processing_mode: trust.processing_mode,
+      confidence: trust.confidence,
+      input_quality: trust.input_quality,
+      document_category: trust.document_category,
+      document_type: trust.document_type,
+      needs_human_review: trust.needs_human_review
+    },
+    banner_type: output.banner?.type,
+    debug: {
+      prompt_version: output.debug?.prompt_version,
+      model: output.debug?.model,
+      ai: {
+        ai_used: ai.ai_used,
+        ai_status: ai.ai_status,
+        ai_provider: ai.ai_provider,
+        ai_model: ai.ai_model,
+        ai_duration_ms: ai.ai_duration_ms,
+        ai_error_code: ai.ai_error_code
+      }
+    }
+  };
 }
 
 function rememberOcrText({ jobId, extractedText, inputQuality, mimeType, originalName }) {

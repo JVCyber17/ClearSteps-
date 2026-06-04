@@ -10,6 +10,7 @@ const VALID_SEVERITY_LEVELS = new Set(["low", "medium", "high", "urgent"]);
 const VALID_PROCESSING_MODES = new Set(["normal", "caution", "verification_only", "unsupported"]);
 const VALID_CONFIDENCE_LEVELS = new Set(["high", "medium", "low"]);
 const VALID_BANNER_TYPES = new Set(["safe", "caution", "warning", "urgent"]);
+const VALID_AI_STATUSES = new Set(["skipped", "completed", "fallback", "failed"]);
 
 async function createDocumentSession(metadata = {}) {
   const clientJobId = cleanText(metadata.clientJobId, 120);
@@ -109,6 +110,12 @@ function buildSafeSessionRow(metadata) {
     ocr_engine: cleanOcrEngine(metadata.ocrEngine),
     ocr_input_quality: normaliseEnum(metadata.ocrInputQuality, VALID_OCR_INPUT_QUALITIES),
     ocr_confidence_category: normaliseEnum(metadata.ocrConfidenceCategory, VALID_OCR_CONFIDENCE_CATEGORIES),
+    ai_used: typeof metadata.aiUsed === "boolean" ? metadata.aiUsed : undefined,
+    ai_status: normaliseEnum(metadata.aiStatus, VALID_AI_STATUSES),
+    ai_provider: cleanAiProvider(metadata.aiProvider),
+    ai_model: cleanAiModel(metadata.aiModel),
+    ai_duration_ms: normaliseDuration(metadata.aiDurationMs),
+    ai_error_code: metadata.aiErrorCode === null ? null : cleanErrorCode(metadata.aiErrorCode),
     error_code: metadata.errorCode === null ? null : cleanErrorCode(metadata.errorCode),
     expires_at: cleanIsoDate(metadata.expiresAt),
     processed_at: cleanIsoDate(metadata.processedAt)
@@ -122,6 +129,7 @@ function buildSafeSessionRow(metadata) {
 function metadataFromAnalysisOutput(output = {}) {
   const trust = output.trust || {};
   const banner = output.banner || {};
+  const ai = output.debug?.ai || {};
 
   return {
     inputQuality: trust.input_quality,
@@ -133,7 +141,13 @@ function metadataFromAnalysisOutput(output = {}) {
     confidence: trust.confidence,
     needsHumanReview: trust.needs_human_review,
     bannerType: banner.type,
-    cardsCount: Array.isArray(output.cards) ? output.cards.length : undefined
+    cardsCount: Array.isArray(output.cards) ? output.cards.length : undefined,
+    aiUsed: typeof ai.ai_used === "boolean" ? ai.ai_used : undefined,
+    aiStatus: ai.ai_status,
+    aiProvider: ai.ai_provider,
+    aiModel: ai.ai_model,
+    aiDurationMs: ai.ai_duration_ms,
+    aiErrorCode: ai.ai_error_code
   };
 }
 
@@ -229,6 +243,16 @@ function normaliseDuration(value) {
 
 function cleanOcrEngine(value) {
   const cleaned = cleanText(value, 40).toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+  return cleaned || undefined;
+}
+
+function cleanAiProvider(value) {
+  const cleaned = cleanText(value, 40).toLowerCase().replace(/[^a-z0-9_-]/g, "_");
+  return cleaned || undefined;
+}
+
+function cleanAiModel(value) {
+  const cleaned = cleanText(value, 80).replace(/[^a-zA-Z0-9_.:-]/g, "_");
   return cleaned || undefined;
 }
 
