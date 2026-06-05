@@ -95,7 +95,13 @@ function assertNoDangerousVerificationInstructions(output) {
 function assertNoInventedDeadline(output) {
   const deadlineCard = output.cards.find((card) => card.id === "when_is_it_due");
   if (!deadlineCard.date) {
-    assert.equal(deadlineCard.short_answer, "No deadline clearly stated.");
+    assert.ok(
+      [
+        "No deadline clearly stated.",
+        "No clear date was found. Check the original document."
+      ].includes(deadlineCard.short_answer),
+      "deadline card avoids inventing a date"
+    );
   }
 }
 
@@ -231,4 +237,45 @@ test("template letter with missing fields is marked and avoids invented facts", 
   assert.equal(output.trust.document_type, "template");
   assert.equal(output.trust.document_category, "template");
   assertNoInventedDeadline(output);
+});
+
+test("readable unsupported official document gives cautious useful cards", () => {
+  const output = runEngine([
+    "Amber Valley Borough Council",
+    "Local Plan Consultation",
+    "11th August 2023",
+    "This letter explains the local plan consultation.",
+    "Please send comments between 1 September 2023 and 30 September 2023.",
+    "The council will review all representations before the next stage."
+  ].join("\n"), "other");
+
+  assertBaseOutput(output);
+  assertActionCardShape(output);
+  assert.equal(output.cards.length, 6);
+
+  const allCardText = output.cards.map((card) => `${card.title} ${card.short_answer}`).join(" ");
+  const senderCard = output.cards.find((card) => card.id === "what_matters_most");
+  const dateCard = output.cards.find((card) => card.id === "when_is_it_due");
+  const actionCard = output.cards.find((card) => card.id === "what_do_i_need_to_do");
+  const helpfulCard = output.cards.find((card) => card.id === "helpful_note");
+
+  assert.match(senderCard.short_answer, /Amber Valley Borough Council/i);
+  assert.match(allCardText, /local plan|consultation/i);
+  assert.match(dateCard.short_answer, /11th August 2023|1 September 2023|30 September 2023/i);
+  assert.doesNotMatch(actionCard.short_answer, /^No action needed right now\./i);
+  assert.doesNotMatch(dateCard.short_answer, /^No deadline clearly stated\./i);
+  assert.match(helpfulCard.short_answer, /reading aid|not advice/i);
+  assert.match(allCardText, /check the original/i);
+});
+
+test("supported council tax notice does not use unsupported reading aid", () => {
+  const output = runEngine([
+    "Council Tax Notice",
+    "Amount due is Â£120.00 by 21/06/2026.",
+    "Please pay your council tax instalment."
+  ].join("\n"), "other");
+
+  assertBaseOutput(output);
+  assert.equal(output.structured_result.document_type, "council_tax_notice");
+  assert.equal(output.cards[1].title, "What matters most?");
 });

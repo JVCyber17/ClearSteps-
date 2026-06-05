@@ -187,6 +187,10 @@ function evaluateTrustAndSeverityLayer({ text, fileMeta, split }) {
 
 function runExtractorLayer({ text, trust }) {
   if (trust.processing_mode === "unsupported") {
+    if (trust.input_quality !== "poor" && String(text || "").trim().length >= 80) {
+      return buildReadableUnsupportedExtraction(text, trust);
+    }
+
     return {
       summary: "Readable text is limited in this upload.",
       most_important_point: "Not clearly stated.",
@@ -231,6 +235,10 @@ function runExtractorLayer({ text, trust }) {
   }
 
   const deadline = extractDeadline(text);
+  if (shouldUseReadableUnsupportedAid(text, trust)) {
+    return buildReadableUnsupportedExtraction(text, trust);
+  }
+
   const actions = extractActions(text, trust);
   const summary = inferSummary(text, trust);
   const risk = inferRisk(text, trust);
@@ -243,7 +251,7 @@ function runExtractorLayer({ text, trust }) {
     deadline,
     risk,
     helpful_note: note,
-    money_amounts: extractMoneyAmounts(text),
+    money_amounts: [],
     reference_numbers: extractReferenceNumbers(text),
     contact_details: extractContactDetails(text, trust),
     appeal_rights: [],
@@ -258,6 +266,10 @@ function runExtractorLayer({ text, trust }) {
 function runRendererLayer({ trust, extraction }) {
   const cardStatus = statusFromTrustAndSeverity(trust);
   const actionLine = normalizeActionLine(extraction.actions);
+
+  if (extraction.readable_unsupported_signals) {
+    return buildReadableUnsupportedCards({ trust, extraction, cardStatus, actionLine });
+  }
 
   return [
     {
@@ -297,6 +309,83 @@ function runRendererLayer({ trust, extraction }) {
       title: "Helpful note",
       short_answer: cleanLine(inferHelpfulNote(trust, extraction.helpful_note)),
       status: cardStatus
+    }
+  ];
+}
+
+function buildReadableUnsupportedExtraction(text, trust) {
+  const signals = extractReadableDocumentSignals(text, trust);
+  const summary = `This appears to be a readable official or formal document about ${signals.topic}. ClearSteps is not fully trained for this document type yet, so use this as a reading aid only.`;
+  const hasClearNoAction = clearlySaysNoActionNeeded(text);
+  const actions = hasClearNoAction
+    ? ["No action needed right now."]
+    : ["Check the original document to see whether a response or action is needed."];
+
+  return {
+    summary,
+    most_important_point: signals.mostImportantPoint,
+    actions,
+    deadline: signals.primaryDate,
+    risk: signals.risk,
+    helpful_note: "ClearSteps is not fully trained for this document type yet. Use this as a reading aid, not advice.",
+    money_amounts: extractMoneyAmounts(text),
+    reference_numbers: [],
+    contact_details: [],
+    appeal_rights: [],
+    support_options: [],
+    confidence: trust.input_quality === "good" ? "medium" : "low",
+    needs_human_review: true,
+    review_reason: "This readable document type is not fully supported yet.",
+    evidence_spans: [],
+    readable_unsupported_signals: signals
+  };
+}
+
+function buildReadableUnsupportedCards({ extraction, cardStatus, actionLine }) {
+  const signals = extraction.readable_unsupported_signals;
+  const status = cardStatus === "good" ? "caution" : cardStatus;
+
+  return [
+    {
+      id: "what_is_this",
+      title: "What is this?",
+      short_answer: cleanLine(extraction.summary),
+      status
+    },
+    {
+      id: "what_matters_most",
+      title: "Who sent it?",
+      short_answer: signals.sender
+        ? cleanLine(`This appears to be from ${signals.sender}. Check the original document to confirm.`)
+        : "The sender is not clearly stated. Check the original document.",
+      status
+    },
+    {
+      id: "what_do_i_need_to_do",
+      title: "What do I need to do?",
+      short_answer: actionLine,
+      steps: Array.isArray(extraction.actions) ? extraction.actions.map(cleanLine) : [],
+      status
+    },
+    {
+      id: "when_is_it_due",
+      title: "When does it matter?",
+      short_answer: cleanLine(signals.dateMessage),
+      date: signals.primaryDate || null,
+      status
+    },
+    {
+      id: "what_could_happen",
+      title: "What matters most?",
+      short_answer: cleanLine(signals.mostImportantPoint),
+      status
+    },
+    {
+      id: "helpful_note",
+      title: "What should I check?",
+      short_answer: cleanLine(extraction.helpful_note),
+      steps: signals.keyChecks,
+      status
     }
   ];
 }
@@ -370,6 +459,7 @@ function buildStructuredCards({ trust, extraction, displayCards }) {
   const deadlineText = extraction.deadline ? `Due by ${extraction.deadline}.` : "No deadline clearly stated.";
   const paymentAmount = firstOrNull(extraction.money_amounts);
   const oldCardById = new Map(displayCards.map((card) => [card.id, card]));
+  const deadlineDisplayText = oldCardById.get("when_is_it_due")?.short_answer || deadlineText;
 
   const cardDefinitions = [
     {
@@ -400,7 +490,7 @@ function buildStructuredCards({ trust, extraction, displayCards }) {
       legacyId: "when_is_it_due",
       cardType: "when_does_it_matter",
       title: "When is it due?",
-      explanation: deadlineText,
+      explanation: deadlineDisplayText,
       keyPoints: extraction.deadline ? [`Check this date on the original document: ${extraction.deadline}.`] : [],
       actionNeeded: null,
       possibleDeadline: extraction.deadline || null
@@ -502,6 +592,211 @@ function buildStructuredWarnings(trust) {
   }
 
   return unique(warnings);
+}
+
+function shouldUseReadableUnsupportedAid(text, trust) {
+  if (!text || trust.input_quality === "poor") return false;
+  if (trust.processing_mode === "verification_only") return false;
+  if (trust.document_type === "template" || trust.document_type === "outgoing" || trust.document_type === "possible_scam") {
+    return false;
+  }
+  return !isFullySupportedDocument(text, trust);
+}
+
+function isFullySupportedDocument(text, trust) {
+  const lower = String(text || "").toLowerCase();
+  if (lower.includes("council tax")) return true;
+  if (
+    lower.includes("energy bill") ||
+    lower.includes("electricity bill") ||
+    lower.includes("gas bill") ||
+    (trust.document_category === "bill_or_payment" && /\b(energy|electricity|gas)\b/.test(lower))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function extractReadableDocumentSignals(text, trust) {
+  const value = String(text || "");
+  const lower = value.toLowerCase();
+  const sender = guessDetailedSender(value) || trust.sender_guess || null;
+  const topic = inferReadableTopic(value, trust);
+  const visibleDates = extractVisibleDates(value);
+  const visibleTimeframes = extractVisibleTimeframes(value);
+  const dateParts = unique([...visibleDates, ...visibleTimeframes]).slice(0, 4);
+  const hasResponseRequest = /\b(please respond|respond by|response|reply by|submit|provide|return|complete|consultation|representation|comment|contact)\b/i.test(value);
+  const hasDeadlineLanguage = /\b(deadline|due by|by no later than|no later than|before|within|reply by|respond by|return by|submit by|complete by)\b/i.test(value);
+  const primaryDate = dateParts[0] || null;
+
+  const mostImportantPoint = buildReadableMostImportantPoint({
+    topic,
+    dateParts,
+    hasResponseRequest,
+    hasDeadlineLanguage
+  });
+
+  return {
+    sender,
+    topic,
+    dateParts,
+    primaryDate,
+    hasResponseRequest,
+    hasDeadlineLanguage,
+    mostImportantPoint,
+    dateMessage: buildReadableDateMessage({ dateParts, hasDeadlineLanguage }),
+    risk: buildReadableRiskMessage({ dateParts, hasResponseRequest, hasDeadlineLanguage }),
+    keyChecks: buildReadableKeyChecks({ sender, topic, dateParts, hasResponseRequest })
+  };
+}
+
+function buildReadableMostImportantPoint({ topic, dateParts, hasResponseRequest, hasDeadlineLanguage }) {
+  if (hasDeadlineLanguage && dateParts.length > 0) {
+    return `This may include a deadline about ${topic}. Check the original before acting.`;
+  }
+  if (hasResponseRequest) {
+    return `This may ask for a response about ${topic}. Check the original document.`;
+  }
+  if (dateParts.length > 0) {
+    return `Important dates are visible. Check what each date refers to.`;
+  }
+  return `The clearest topic appears to be ${topic}. Check the original for details.`;
+}
+
+function buildReadableDateMessage({ dateParts, hasDeadlineLanguage }) {
+  if (dateParts.length === 0) {
+    return "No clear date was found. Check the original document.";
+  }
+
+  const visibleText = dateParts.slice(0, 3).join(", ");
+  if (hasDeadlineLanguage) {
+    return `These may be important dates: ${visibleText}. Check what they refer to.`;
+  }
+  return `These dates appear in the document: ${visibleText}. Check what they refer to.`;
+}
+
+function buildReadableRiskMessage({ dateParts, hasResponseRequest, hasDeadlineLanguage }) {
+  if (hasDeadlineLanguage || hasResponseRequest) {
+    return "You may miss a response request or important date.";
+  }
+  if (dateParts.length > 0) {
+    return "You may miss what the visible dates mean.";
+  }
+  return "Not clearly stated. Check the original document.";
+}
+
+function buildReadableKeyChecks({ sender, topic, dateParts, hasResponseRequest }) {
+  const checks = [];
+  checks.push(sender ? `Check the sender: ${sender}.` : "Check who sent the document.");
+  checks.push(`Check the topic: ${topic}.`);
+  if (dateParts.length > 0) checks.push(`Check these visible dates: ${dateParts.slice(0, 3).join(", ")}.`);
+  if (hasResponseRequest) checks.push("Check whether a response is requested.");
+  checks.push("Use official contact details before acting.");
+  return unique(checks).slice(0, 5);
+}
+
+function inferReadableTopic(text, trust) {
+  const lower = String(text || "").toLowerCase();
+  const topicChecks = [
+    [["local plan", "planning", "consultation"], "a local plan or consultation"],
+    [["urgent care centre", "healthcare", "nhs"], "healthcare services"],
+    [["appointment", "clinic"], "an appointment"],
+    [["school", "trip", "student"], "school or education"],
+    [["employment", "attendance", "manager"], "work or employment"],
+    [["rent", "landlord", "tenancy"], "housing or rent"],
+    [["loan", "bank", "mortgage"], "banking or a loan"],
+    [["insurance", "policy", "claim"], "insurance"],
+    [["benefit", "universal credit"], "benefits support"],
+    [["court", "tribunal", "legal"], "a legal or court matter"],
+    [["council", "borough"], "a council or local authority matter"],
+    [["hmrc", "tax"], "tax or HMRC"],
+    [["medical", "hospital", "gp"], "medical information"]
+  ];
+
+  for (const [needles, label] of topicChecks) {
+    if (needles.some((needle) => lower.includes(needle))) return label;
+  }
+
+  const heading = firstMeaningfulHeading(text);
+  if (heading) return heading.toLowerCase();
+
+  const categoryLabels = {
+    appointment: "an appointment",
+    employment: "work or employment",
+    education: "school or education",
+    housing: "housing or rent",
+    bank_or_loan: "banking or a loan",
+    government: "a government or council matter",
+    medical: "medical information",
+    legal_or_court: "a legal or court matter",
+    benefits: "benefits support",
+    insurance: "insurance",
+    email: "an email message",
+    unknown: "the topic shown in the document",
+    unsupported: "the topic shown in the document"
+  };
+
+  return categoryLabels[trust.document_category] || "the topic shown in the document";
+}
+
+function firstMeaningfulHeading(text) {
+  const lines = String(text || "")
+    .split(/\r?\n/)
+    .map((line) => cleanLine(line))
+    .filter(Boolean)
+    .slice(0, 12);
+
+  return lines.find((line) => (
+    line.length >= 6 &&
+    line.length <= 70 &&
+    !/\b(dear|tel|telephone|email|address|postcode|reference|ref:)\b/i.test(line) &&
+    !/\b\d{1,2}(?:st|nd|rd|th)?\s+[a-z]+\s+\d{4}\b/i.test(line) &&
+    !/^\d/.test(line)
+  )) || null;
+}
+
+function guessDetailedSender(text) {
+  const lines = String(text || "")
+    .split(/\r?\n/)
+    .map((line) => cleanLine(line))
+    .filter(Boolean)
+    .slice(0, 14);
+
+  const senderLine = lines.find((line) => (
+    /\b(HMRC|NHS|Council|Borough|County|University|School|College|Department|Authority|Bank|Court|Hospital|Clinic|Trust|Employer|Landlord)\b/i.test(line) &&
+    line.length <= 90 &&
+    !/\b(email|telephone|tel|floor|street|road|postcode)\b/i.test(line)
+  ));
+
+  return senderLine || null;
+}
+
+function extractVisibleDates(text) {
+  const value = String(text || "");
+  const matches = [];
+
+  const patterns = [
+    /\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b/g,
+    /\b\d{1,2}(?:st|nd|rd|th)?\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{2,4}\b/gi,
+    /\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|sept|oct|nov|dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?,?\s+\d{2,4}\b/gi
+  ];
+
+  patterns.forEach((pattern) => {
+    const found = value.match(pattern) || [];
+    found.forEach((match) => matches.push(cleanLine(match)));
+  });
+
+  return unique(matches).slice(0, 5);
+}
+
+function extractVisibleTimeframes(text) {
+  const value = String(text || "");
+  const matches = value.match(/\bwithin\s+\d+\s+(?:day|days|week|weeks|month|months)|\b(?:today|tomorrow|next week|next month)\b/gi) || [];
+  return unique(matches.map(cleanLine)).slice(0, 3);
+}
+
+function clearlySaysNoActionNeeded(text) {
+  return /\b(no action needed|no action is needed|you do not need to do anything|for information only)\b/i.test(String(text || ""));
 }
 
 function detectStructuredDocumentType({ text, trust }) {
