@@ -259,6 +259,10 @@ let pendingDocumentJobId = null;
 let currentTheme = "calm";
 let currentBackgroundStyle = "plain";
 let activeFeedbackAnswer = "";
+let latestUploadInputQuality = "unknown";
+let latestOcrStatus = "unknown";
+let lastTrackedCardKey = "";
+let journeyCompletedTracked = false;
 
 const backgroundStyles = ["plain", "dots", "animals", "dinosaurs", "space", "ocean", "cars", "shapes", "notebook", "cozy", "heroes"];
 const legacyBackgroundStyles = {
@@ -428,6 +432,11 @@ function setFocusMode(isActive, options = {}) {
   }
 
   if (options.save) {
+    if (isActive) {
+      trackAnalyticsEvent("focus_mode_used", {
+        section: hasUploadedResult() ? "cue_card" : "global"
+      });
+    }
     savePreferences(false);
   }
 }
@@ -499,9 +508,17 @@ function wireUpload() {
 
     setLoading(true);
     setStatus("Reading your document.");
-      setJourneyStep("upload");
-      document.querySelector("#achievement").classList.add("hidden");
-      cardFeedbackPanel.classList.add("hidden");
+    setJourneyStep("upload");
+    document.querySelector("#achievement").classList.add("hidden");
+    cardFeedbackPanel.classList.add("hidden");
+    lastTrackedCardKey = "";
+    journeyCompletedTracked = false;
+
+    trackAnalyticsEvent("upload_started", {
+      page: "journey",
+      section: "upload",
+      document_type: selectedType
+    });
 
     const formData = new FormData();
     formData.append("letter", file);
@@ -519,18 +536,65 @@ function wireUpload() {
       }
 
       if (isOcrReadyResult(payload)) {
+        latestUploadInputQuality = payload.input_quality || "unknown";
+        latestOcrStatus = payload.success ? "completed" : "failed";
+        trackAnalyticsEvent(payload.success ? "upload_completed" : "upload_failed", {
+          page: "journey",
+          section: "upload",
+          client_job_id: payload.job_id || "",
+          document_type: selectedType,
+          input_quality: latestUploadInputQuality,
+          ocr_status: latestOcrStatus,
+          error_code: payload.success ? "" : "ocr_unreadable"
+        });
         showOcrReadyResult(payload);
         return;
       }
 
       latestResult = normalizeApiResult(payload);
       latestResult.hasUploaded = true;
+      latestUploadInputQuality = latestResult.trust?.input_quality || "unknown";
+      latestOcrStatus = latestResult.debug?.ocr_status || latestOcrStatus || "unknown";
       pendingDocumentJobId = null;
       cardIndex = 0;
+      trackAnalyticsEvent("upload_completed", {
+        page: "journey",
+        section: "upload",
+        client_job_id: latestResult.job_id,
+        document_type: selectedType,
+        input_quality: latestUploadInputQuality,
+        ocr_status: latestOcrStatus
+      });
+      trackAnalyticsEvent("analysis_completed", {
+        page: "journey",
+        section: "analysis",
+        client_job_id: latestResult.job_id,
+        document_type: latestResult.trust?.document_category || selectedType,
+        input_quality: latestUploadInputQuality,
+        ai_status: extractAiStatus(latestResult),
+        ocr_status: latestOcrStatus
+      });
+      trackAnalyticsEvent("cards_generated", {
+        page: "journey",
+        section: "cue_cards",
+        client_job_id: latestResult.job_id,
+        document_type: latestResult.trust?.document_category || selectedType,
+        input_quality: latestUploadInputQuality,
+        ai_status: extractAiStatus(latestResult),
+        ocr_status: latestOcrStatus
+      });
       renderCard();
       setJourneyStep("understand");
       setStatus("Your cue cards are ready.");
     } catch (error) {
+      latestOcrStatus = "failed";
+      trackAnalyticsEvent("upload_failed", {
+        page: "journey",
+        section: "upload",
+        document_type: selectedType,
+        ocr_status: latestOcrStatus,
+        error_code: "upload_request_failed"
+      });
       setStatus(error.message || "Please try again.", true);
     } finally {
       setLoading(false);
@@ -544,8 +608,17 @@ function closeMoreTypeMenu() {
 }
 
 async function analyseReadyDocument() {
+  const analysisJobId = pendingDocumentJobId;
   setLoading(true);
   setStatus("Understanding your document.");
+  trackAnalyticsEvent("analysis_started", {
+    page: "journey",
+    section: "analysis",
+    client_job_id: analysisJobId,
+    document_type: selectedType,
+    input_quality: latestUploadInputQuality,
+    ocr_status: latestOcrStatus || "completed"
+  });
 
   try {
     const response = await fetch("/api/simplify", {
@@ -567,12 +640,43 @@ async function analyseReadyDocument() {
 
     latestResult = normalizeApiResult(payload);
     latestResult.hasUploaded = true;
+    latestUploadInputQuality = latestResult.trust?.input_quality || latestUploadInputQuality || "unknown";
+    latestOcrStatus = latestResult.debug?.ocr_status || latestOcrStatus || "completed";
     pendingDocumentJobId = null;
     cardIndex = 0;
+    lastTrackedCardKey = "";
+    journeyCompletedTracked = false;
+    trackAnalyticsEvent("analysis_completed", {
+      page: "journey",
+      section: "analysis",
+      client_job_id: latestResult.job_id || analysisJobId,
+      document_type: latestResult.trust?.document_category || selectedType,
+      input_quality: latestUploadInputQuality,
+      ai_status: extractAiStatus(latestResult),
+      ocr_status: latestOcrStatus
+    });
+    trackAnalyticsEvent("cards_generated", {
+      page: "journey",
+      section: "cue_cards",
+      client_job_id: latestResult.job_id || analysisJobId,
+      document_type: latestResult.trust?.document_category || selectedType,
+      input_quality: latestUploadInputQuality,
+      ai_status: extractAiStatus(latestResult),
+      ocr_status: latestOcrStatus
+    });
     renderCard();
     setJourneyStep("understand");
     setStatus("Your cue cards are ready.");
   } catch (error) {
+    trackAnalyticsEvent("analysis_failed", {
+      page: "journey",
+      section: "analysis",
+      client_job_id: analysisJobId,
+      document_type: selectedType,
+      input_quality: latestUploadInputQuality,
+      ocr_status: latestOcrStatus,
+      error_code: "analysis_request_failed"
+    });
     setStatus(error.message || "Please try again.", true);
   } finally {
     setLoading(false);
@@ -581,6 +685,7 @@ async function analyseReadyDocument() {
 
 function wireCueCards() {
   document.querySelector("#card-back").addEventListener("click", () => {
+    trackCurrentCardAction("back_clicked");
     if (cardIndex === 0) {
       setJourneyStep("upload");
       return;
@@ -593,11 +698,21 @@ function wireCueCards() {
 
   document.querySelector("#card-next").addEventListener("click", () => {
     const cards = latestResult.cards;
+    trackCurrentCardAction("next_clicked");
     if (cardIndex >= cards.length - 1) {
       setJourneyStep("act");
       document.querySelector("#achievement").classList.remove("hidden");
       cardFeedbackPanel.classList.remove("hidden");
       showActionMessage("");
+      if (!journeyCompletedTracked) {
+        journeyCompletedTracked = true;
+        trackAnalyticsEvent("journey_completed", {
+          page: "journey",
+          section: "cue_cards",
+          card_number: cardIndex + 1,
+          card_type: cards[cardIndex]?.id || ""
+        });
+      }
       return;
     }
 
@@ -621,6 +736,10 @@ function wireCueCards() {
 function wireActions() {
   document.querySelector("#copy-summary").addEventListener("click", async () => {
     setJourneyStep("act");
+    trackAnalyticsEvent("copy_summary_clicked", {
+      page: "journey",
+      section: "actions"
+    });
     const text = latestResult.cards.map((card) => `${card.title} ${card.short_answer}`).join("\n");
     try {
       await navigator.clipboard.writeText(text);
@@ -653,6 +772,10 @@ function wireActions() {
   document.querySelector("#upload-another").addEventListener("click", () => {
     form.reset();
     pendingDocumentJobId = null;
+    latestUploadInputQuality = "unknown";
+    latestOcrStatus = "unknown";
+    lastTrackedCardKey = "";
+    journeyCompletedTracked = false;
     fileName.textContent = "PDF, image, or document";
     setStatus("Choose a document to begin.");
     latestResult = createMockApiResult();
@@ -1302,6 +1425,10 @@ function openDocumentCheck() {
   }
 
   setJourneyStep("check");
+  trackAnalyticsEvent("document_check_clicked", {
+    page: "journey",
+    section: "document_check"
+  });
   openModal("Document check", buildCheckMarkup(latestResult.trust));
 }
 
@@ -1325,6 +1452,7 @@ function renderCard() {
   }
 
   renderProgressDots();
+  trackCurrentCardViewed();
 }
 
 function stylePillMarkup(label) {
@@ -1389,6 +1517,12 @@ function openCardStyleModal() {
   document.querySelectorAll(".style-option").forEach((button) => {
     button.addEventListener("click", () => {
       activeCardStyle = button.dataset.style;
+      if (activeCardStyle === "simple") {
+        trackAnalyticsEvent("simple_view_used", {
+          page: "journey",
+          section: "card_style"
+        });
+      }
       closeModal();
       renderCard();
       showActionMessage(`${labelForStyle(activeCardStyle)} selected.`);
@@ -1421,6 +1555,10 @@ function openReminderModal() {
 function openFeedbackModal(sourceButton) {
   activeFeedbackAnswer = "";
   const returnTarget = sourceButton?.currentTarget || sourceButton?.target || sourceButton;
+  trackAnalyticsEvent("feedback_opened", {
+    page: document.body.dataset.page || "unknown",
+    section: "feedback"
+  });
   openModal("Give feedback", buildFeedbackStepOneMarkup(), {
     returnFocusTo: returnTarget,
     variant: "feedback"

@@ -5,6 +5,7 @@ const path = require("node:path");
 
 const { simplifyRoute } = require("./src/routes/simplifyRoute");
 const { warnIfSupabaseConfigMissing } = require("./src/config/supabaseConfig");
+const { saveAnalyticsEvent } = require("./src/services/analyticsService");
 const { saveFeedbackEvent } = require("./src/services/feedbackService");
 const {
   getOrCreateAnonymousSessionId,
@@ -18,6 +19,7 @@ warnIfSupabaseConfigMissing();
 const PORT = Number(process.env.PORT || 3000);
 const MAX_UPLOAD_BYTES = 15 * 1024 * 1024;
 const MAX_FEEDBACK_BYTES = 64 * 1024;
+const MAX_ANALYTICS_BYTES = 16 * 1024;
 const PUBLIC_DIR = path.join(__dirname, "public");
 const UPLOAD_DIR = path.join(__dirname, "private_storage", "uploads");
 const RESULT_DIR = path.join(__dirname, "private_storage", "results");
@@ -48,6 +50,10 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === "POST" && pathOnly === "/api/feedback") {
       return handleFeedback(req, res);
+    }
+
+    if (req.method === "POST" && pathOnly === "/api/analytics") {
+      return handleAnalytics(req, res);
     }
 
     sendJson(res, 404, { error: "Not found." });
@@ -171,6 +177,44 @@ async function handleFeedback(req, res) {
       error: statusCode === 400
         ? error.message
         : "Feedback could not be saved right now."
+    });
+  }
+}
+
+async function handleAnalytics(req, res) {
+  const anonymousSession = getOrCreateAnonymousSessionId(req);
+  const contentType = req.headers["content-type"] || "";
+  if (!contentType.includes("application/json")) {
+    return sendJson(res, 400, { error: "Use JSON for analytics." });
+  }
+
+  const body = await readRequestBody(req, MAX_ANALYTICS_BYTES);
+  let payload;
+  try {
+    payload = JSON.parse(body.toString("utf8"));
+  } catch (error) {
+    return sendJson(res, 400, { error: "Invalid JSON body." });
+  }
+
+  try {
+    const result = await saveAnalyticsEvent(payload, {
+      anonymousSessionId: anonymousSession.anonymousSessionId
+    });
+    if (anonymousSession.shouldSetCookie) {
+      appendAnonymousSessionCookie(req, res, anonymousSession.anonymousSessionId);
+    }
+    return sendJson(res, 202, {
+      success: true,
+      analytics_event_id: result.id
+    });
+  } catch (error) {
+    const statusCode = error.statusCode || 500;
+    console.error("Analytics save failed:", error.message);
+    return sendJson(res, statusCode, {
+      success: false,
+      error: statusCode === 400
+        ? error.message
+        : "Analytics event could not be saved right now."
     });
   }
 }
