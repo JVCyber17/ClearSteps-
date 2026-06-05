@@ -22,6 +22,7 @@ const ALLOWED_EVENT_NAMES = new Set([
 
 const ALLOWED_FIELDS = new Set([
   "event_name",
+  "anonymous_session_id",
   "client_job_id",
   "page",
   "section",
@@ -50,6 +51,8 @@ function buildAnalyticsEventRow(payload, options = {}) {
   }
 
   const metadata = {
+    // Browser-sent anonymous_session_id is accepted for API compatibility,
+    // but the backend-generated session ID is the only value stored.
     anonymous_session_id: cleanText(options.anonymousSessionId, 120) || null,
     client_job_id: cleanText(payload.client_job_id, 120) || null,
     section: cleanText(payload.section, MAX_TEXT_LENGTH) || null,
