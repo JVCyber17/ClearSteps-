@@ -674,23 +674,12 @@
             <span><strong>Hurray, you completed this section.</strong> Great job, your journey is clearer now.</span>
           </div>
 
-          <section id="card-feedback-panel" class="short-feedback-panel hidden" data-feedback-context="after_cards" aria-label="Feedback after cue cards">
-            <h2>Was this helpful?</h2>
-            <div class="feedback-rating-row" role="group" aria-label="Feedback rating">
-              <button type="button" class="feedback-rating-btn" data-rating="Yes, this helped">Yes, this helped</button>
-              <button type="button" class="feedback-rating-btn" data-rating="A little">A little</button>
-              <button type="button" class="feedback-rating-btn" data-rating="No, I was confused">No, I was confused</button>
+          <section id="card-feedback-panel" class="after-card-feedback hidden" aria-label="Feedback after cue cards">
+            <div>
+              <h2>Was this helpful?</h2>
+              <p>Tell us what felt clear or confusing.</p>
             </div>
-            <label class="feedback-label" for="card-feedback-comment">What could be clearer?</label>
-            <textarea id="card-feedback-comment" class="short-feedback-comment" maxlength="240" placeholder="A short note is enough."></textarea>
-            <div class="optional-contact">
-              <p><strong>Optional</strong><br>Leave your email or phone number if you are happy for us to contact you about your feedback.</p>
-              <label class="feedback-label" for="card-feedback-contact">Email or phone number</label>
-              <input id="card-feedback-contact" class="feedback-contact-input" type="text" placeholder="Only if you want us to contact you">
-              <small>We will only use this to ask about your feedback.</small>
-            </div>
-            <button type="button" class="primary-btn send-short-feedback">Send feedback</button>
-            <p class="feedback-saved-message" role="status" aria-live="polite"></p>
+            <button type="button" class="primary-btn" data-feedback-open>Give feedback</button>
           </section>
         </div>
       </section>

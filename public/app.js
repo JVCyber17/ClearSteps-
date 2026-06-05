@@ -441,6 +441,84 @@ function setFocusMode(isActive, options = {}) {
   }
 }
 
+function trackCurrentCardViewed() {
+  if (!hasUploadedResult()) return;
+
+  const card = latestResult.cards?.[cardIndex];
+  if (!card) return;
+
+  const key = `${latestResult.job_id || pendingDocumentJobId || "mock"}:${cardIndex}:${card.id}`;
+  if (key === lastTrackedCardKey) return;
+
+  lastTrackedCardKey = key;
+  trackAnalyticsEvent("card_viewed", {
+    page: "journey",
+    section: "cue_card",
+    card_number: cardIndex + 1,
+    card_type: card.id
+  });
+}
+
+function trackCurrentCardAction(eventName) {
+  if (!hasUploadedResult()) return;
+
+  const card = latestResult.cards?.[cardIndex];
+  trackAnalyticsEvent(eventName, {
+    page: "journey",
+    section: "cue_card",
+    card_number: cardIndex + 1,
+    card_type: card?.id || ""
+  });
+}
+
+function trackAnalyticsEvent(eventName, fields = {}) {
+  try {
+    const payload = buildAnalyticsPayload(eventName, fields);
+    if (!payload.event_name) return;
+
+    fetch("/api/analytics", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      keepalive: true
+    }).catch(() => {});
+  } catch (error) {
+    // Analytics must never block reading, uploading, feedback, or navigation.
+  }
+}
+
+function buildAnalyticsPayload(eventName, fields = {}) {
+  const trust = latestResult?.trust || {};
+  const card = latestResult?.cards?.[cardIndex] || {};
+  const payload = {
+    event_name: eventName,
+    client_job_id: fields.client_job_id || latestResult?.job_id || pendingDocumentJobId || "",
+    page: fields.page || document.body.dataset.page || "unknown",
+    section: fields.section || "",
+    card_number: fields.card_number || "",
+    card_type: fields.card_type || card.id || "",
+    document_type: fields.document_type || trust.document_category || trust.document_type || selectedType || "",
+    input_quality: fields.input_quality || trust.input_quality || latestUploadInputQuality || "",
+    ai_status: fields.ai_status || extractAiStatus(latestResult) || "",
+    ocr_status: fields.ocr_status || latestOcrStatus || "",
+    error_code: fields.error_code || "",
+    created_at: new Date().toISOString()
+  };
+
+  return Object.fromEntries(
+    Object.entries(payload).filter(([, value]) => value !== "" && value !== null && value !== undefined)
+  );
+}
+
+function extractAiStatus(result) {
+  if (!result) return "";
+  return result.ai_status
+    || result.debug?.ai_status
+    || result.debug?.ai?.status
+    || result.debug?.ai?.ai_status
+    || "";
+}
+
 function wireUpload() {
   chips.forEach((chip) => {
     chip.addEventListener("click", () => {
@@ -1763,6 +1841,11 @@ async function saveShortFeedback(panel) {
   } finally {
     if (sendButton) sendButton.disabled = false;
   }
+
+  trackAnalyticsEvent("feedback_submitted", {
+    page: feedback.page,
+    section: feedback.section
+  });
 
   if (panel.dataset.feedbackContext === "modal") {
     modalTitle.textContent = "Thanks.";
