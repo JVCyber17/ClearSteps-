@@ -447,7 +447,7 @@ textarea:focus-visible,
 .brand-name {
   color: var(--text);
   font-family: var(--font-heading);
-  font-size: 36px;
+  font-size: 33px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0;
@@ -5506,7 +5506,7 @@ body.theme-dark .landing-cue-preview {
   }
 
   .brand-name {
-    font-size: 26px;
+    font-size: 24px;
   }
 
   .home-layout {

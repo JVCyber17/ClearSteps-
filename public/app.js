@@ -559,14 +559,14 @@ function wireUpload() {
   fileInput.addEventListener("change", () => {
     const file = fileInput.files[0];
     pendingDocumentJobId = null;
-    fileName.textContent = "PDF, image, or document";
+    fileName.textContent = "PDF, JPG, or PNG";
     setStatus(file ? "Document selected." : "Choose a document to begin.");
   });
 
   removeDocumentButton?.addEventListener("click", () => {
     fileInput.value = "";
     pendingDocumentJobId = null;
-    fileName.textContent = "PDF, image, or document";
+    fileName.textContent = "PDF, JPG, or PNG";
     setStatus("Choose a document to begin.");
     fileInput.focus();
   });
@@ -855,7 +855,7 @@ function wireActions() {
     latestOcrStatus = "unknown";
     lastTrackedCardKey = "";
     journeyCompletedTracked = false;
-    fileName.textContent = "PDF, image, or document";
+    fileName.textContent = "PDF, JPG, or PNG";
     setStatus("Choose a document to begin.");
     latestResult = createMockApiResult();
     cardIndex = 0;
